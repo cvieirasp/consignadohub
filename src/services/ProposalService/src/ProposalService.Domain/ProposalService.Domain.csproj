@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\building-blocks\ConsignadoHub.BuildingBlocks\ConsignadoHub.BuildingBlocks.csproj" />
+  </ItemGroup>
+</Project>

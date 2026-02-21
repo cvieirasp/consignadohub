@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ProposalService.Domain\ProposalService.Domain.csproj" />
+    <ProjectReference Include="..\..\..\..\building-blocks\ConsignadoHub.BuildingBlocks\ConsignadoHub.BuildingBlocks.csproj" />
+  </ItemGroup>
+
+</Project>

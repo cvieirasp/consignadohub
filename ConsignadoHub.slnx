@@ -1,0 +1,27 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/building-blocks/">
+    <Project Path="src/building-blocks/ConsignadoHub.BuildingBlocks/ConsignadoHub.BuildingBlocks.csproj" />
+  </Folder>
+  <Folder Name="/src/services/" />
+  <Folder Name="/src/services/CustomerService/" />
+  <Folder Name="/src/services/CustomerService/src/">
+    <Project Path="src/services/CustomerService/src/CustomerService.Api/CustomerService.Api.csproj" />
+    <Project Path="src/services/CustomerService/src/CustomerService.Application/CustomerService.Application.csproj" />
+    <Project Path="src/services/CustomerService/src/CustomerService.Domain/CustomerService.Domain.csproj" />
+    <Project Path="src/services/CustomerService/src/CustomerService.Infrastructure/CustomerService.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/services/CustomerService/tests/">
+    <Project Path="src/services/CustomerService/tests/CustomerService.UnitTests/CustomerService.UnitTests.csproj" />
+  </Folder>
+  <Folder Name="/src/services/ProposalService/" />
+  <Folder Name="/src/services/ProposalService/src/">
+    <Project Path="src/services/ProposalService/src/ProposalService.Api/ProposalService.Api.csproj" />
+    <Project Path="src/services/ProposalService/src/ProposalService.Application/ProposalService.Application.csproj" />
+    <Project Path="src/services/ProposalService/src/ProposalService.Domain/ProposalService.Domain.csproj" />
+    <Project Path="src/services/ProposalService/src/ProposalService.Infrastructure/ProposalService.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/services/ProposalService/tests/">
+    <Project Path="src/services/ProposalService/tests/ProposalService.UnitTests/ProposalService.UnitTests.csproj" />
+  </Folder>
+</Solution>

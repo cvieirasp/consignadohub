@@ -1,0 +1,45 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+  <ItemGroup Label="ASP.NET Core">
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.3" />
+  </ItemGroup>
+
+  <ItemGroup Label="EF Core">
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.2" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.2" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.2" />
+  </ItemGroup>
+
+  <ItemGroup Label="Swagger / API">
+    <PackageVersion Include="Scalar.AspNetCore" Version="2.0.34" />
+    <PackageVersion Include="Asp.Versioning.Http" Version="8.1.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="Validation">
+    <PackageVersion Include="FluentValidation" Version="11.11.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="Logging">
+    <PackageVersion Include="Serilog.AspNetCore" Version="9.0.0" />
+    <PackageVersion Include="Serilog.Sinks.Console" Version="6.0.0" />
+    <PackageVersion Include="Serilog.Enrichers.Environment" Version="3.0.1" />
+    <PackageVersion Include="Serilog.Enrichers.Thread" Version="4.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="Health Checks">
+    <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="9.0.2" />
+    <PackageVersion Include="AspNetCore.HealthChecks.SqlServer" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="Testing">
+    <PackageVersion Include="xunit" Version="2.9.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.4" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageVersion Include="FluentAssertions" Version="8.2.0" />
+    <PackageVersion Include="Moq" Version="4.20.72" />
+    <PackageVersion Include="coverlet.collector" Version="6.0.4" />
+  </ItemGroup>
+</Project>
