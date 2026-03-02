@@ -2,6 +2,7 @@
   <Folder Name="/src/" />
   <Folder Name="/src/building-blocks/">
     <Project Path="src/building-blocks/ConsignadoHub.BuildingBlocks/ConsignadoHub.BuildingBlocks.csproj" />
+    <Project Path="src/building-blocks/ConsignadoHub.Contracts/ConsignadoHub.Contracts.csproj" />
   </Folder>
   <Folder Name="/src/services/" />
   <Folder Name="/src/services/CustomerService/" />
@@ -13,6 +14,7 @@
   </Folder>
   <Folder Name="/src/services/CustomerService/tests/">
     <Project Path="src/services/CustomerService/tests/CustomerService.UnitTests/CustomerService.UnitTests.csproj" />
+    <Project Path="src/services/CustomerService/tests/CustomerService.IntegrationTests/CustomerService.IntegrationTests.csproj" />
   </Folder>
   <Folder Name="/src/services/ProposalService/" />
   <Folder Name="/src/services/ProposalService/src/">
@@ -23,5 +25,26 @@
   </Folder>
   <Folder Name="/src/services/ProposalService/tests/">
     <Project Path="src/services/ProposalService/tests/ProposalService.UnitTests/ProposalService.UnitTests.csproj" />
+    <Project Path="src/services/ProposalService/tests/ProposalService.IntegrationTests/ProposalService.IntegrationTests.csproj" />
+  </Folder>
+  <Folder Name="/src/services/WorkflowWorker/" />
+  <Folder Name="/src/services/WorkflowWorker/src/">
+    <Project Path="src/services/WorkflowWorker/src/WorkflowWorker.Application/WorkflowWorker.Application.csproj" />
+    <Project Path="src/services/WorkflowWorker/src/WorkflowWorker.Infrastructure/WorkflowWorker.Infrastructure.csproj" />
+    <Project Path="src/services/WorkflowWorker/src/WorkflowWorker.Worker/WorkflowWorker.Worker.csproj" />
+  </Folder>
+  <Folder Name="/src/services/WorkflowWorker/tests/">
+    <Project Path="src/services/WorkflowWorker/tests/WorkflowWorker.UnitTests/WorkflowWorker.UnitTests.csproj" />
+    <Project Path="src/services/WorkflowWorker/tests/WorkflowWorker.IntegrationTests/WorkflowWorker.IntegrationTests.csproj" />
+  </Folder>
+  <Folder Name="/src/services/NotificationService/" />
+  <Folder Name="/src/services/NotificationService/src/">
+    <Project Path="src/services/NotificationService/src/NotificationService.Application/NotificationService.Application.csproj" />
+    <Project Path="src/services/NotificationService/src/NotificationService.Infrastructure/NotificationService.Infrastructure.csproj" />
+    <Project Path="src/services/NotificationService/src/NotificationService.Worker/NotificationService.Worker.csproj" />
+  </Folder>
+  <Folder Name="/src/services/NotificationService/tests/">
+    <Project Path="src/services/NotificationService/tests/NotificationService.UnitTests/NotificationService.UnitTests.csproj" />
+    <Project Path="src/services/NotificationService/tests/NotificationService.IntegrationTests/NotificationService.IntegrationTests.csproj" />
   </Folder>
 </Solution>
