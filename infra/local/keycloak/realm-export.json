@@ -1,0 +1,92 @@
+{
+  "realm": "consignadohub",
+  "enabled": true,
+  "displayName": "ConsignadoHub",
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "roles": {
+    "realm": [
+      {
+        "name": "consignado-admin",
+        "description": "Full administrative access to ConsignadoHub APIs"
+      },
+      {
+        "name": "consignado-analyst",
+        "description": "Read and analyst access to ConsignadoHub APIs"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "consignadohub-api",
+      "enabled": true,
+      "publicClient": true,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "protocol": "openid-connect",
+      "redirectUris": ["*"],
+      "webOrigins": ["*"],
+      "protocolMappers": [
+        {
+          "name": "audience-mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "consignadohub-api",
+            "id.token.claim": "false",
+            "access.token.claim": "true"
+          }
+        },
+        {
+          "name": "realm-roles-mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "multivalued": "true",
+            "user.attribute": "foo",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "roles",
+            "jsonType.label": "String"
+          }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "admin-user",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "admin@consignadohub.local",
+      "firstName": "Admin",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["consignado-admin"]
+    },
+    {
+      "username": "analyst-user",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "analyst@consignadohub.local",
+      "firstName": "Analyst",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "analyst123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["consignado-analyst"]
+    }
+  ]
+}
