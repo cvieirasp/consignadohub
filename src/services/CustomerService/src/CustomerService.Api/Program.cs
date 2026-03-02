@@ -6,6 +6,7 @@ using CustomerService.Infrastructure.Extensions;
 using CustomerService.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi;
 using Scalar.AspNetCore;
 using Serilog;
 
@@ -22,6 +23,8 @@ builder.Host.UseSerilog((ctx, lc) => lc
 
 // Services
 builder.Services.AddBuildingBlocks();
+builder.Services.AddKeycloakAuthentication(builder.Configuration);
+builder.Services.AddConsignadoHubObservability(builder.Configuration, builder.Environment, "CustomerService");
 builder.Services.AddCustomerApplication();
 builder.Services.AddCustomerInfrastructure(builder.Configuration);
 
@@ -34,7 +37,22 @@ builder.Services.AddApiVersioning(options =>
 });
 
 // OpenAPI / Scalar
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer((document, _, _) =>
+    {
+        document.Components ??= new OpenApiComponents();
+        document.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>();
+        document.Components.SecuritySchemes["BearerAuth"] = new OpenApiSecurityScheme
+        {
+            Type = SecuritySchemeType.Http,
+            Scheme = "bearer",
+            BearerFormat = "JWT",
+            Description = "JWT token from Keycloak. Acquire via: POST /realms/consignadohub/protocol/openid-connect/token"
+        };
+        return Task.CompletedTask;
+    });
+});
 
 // ProblemDetails
 builder.Services.AddProblemDetails();
@@ -49,11 +67,19 @@ var app = builder.Build();
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 app.UseCorrelationId();
+app.UseAuthentication();
+app.UseAuthorization();
 
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.MapScalarApiReference();
+    app.MapScalarApiReference(options =>
+    {
+        options
+            .WithTitle("ConsignadoHub — CustomerService API")
+            .WithPreferredScheme("BearerAuth")
+            .WithHttpBearerAuthentication(bearer => bearer.Token = string.Empty);
+    });
 
     // Apply migrations on startup in dev
     using var scope = app.Services.CreateScope();
@@ -73,6 +99,7 @@ app.MapGroup("/v1/customers")
     .WithApiVersionSet(apiVersionSet)
     .MapToApiVersion(1, 0)
     .WithTags("Customers")
+    .RequireAuthorization()
     .MapCustomerEndpoints();
 
 // Health checks

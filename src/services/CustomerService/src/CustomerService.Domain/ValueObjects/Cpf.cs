@@ -31,7 +31,7 @@ public sealed class Cpf
     }
 
     private static string Normalize(string raw) =>
-        new string(raw.Where(char.IsDigit).ToArray());
+        new([.. raw.Where(char.IsDigit)]);
 
     private static bool ValidateCheckDigits(string digits)
     {
@@ -52,7 +52,8 @@ public sealed class Cpf
         return second == digits[10] - '0';
     }
 
-    public override string ToString() => Value;
-    public override bool Equals(object? obj) => obj is Cpf other && Value == other.Value;
     public override int GetHashCode() => Value.GetHashCode();
+
+    public override bool Equals(object? obj) =>
+        obj is Cpf other && Value == other.Value;
 }
