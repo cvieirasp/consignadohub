@@ -10,7 +10,9 @@
     <PackageReference Include="xunit.runner.visualstudio" />
     <PackageReference Include="coverlet.collector" />
     <PackageReference Include="FluentAssertions" />
-    <PackageReference Include="Moq" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <PackageReference Include="Testcontainers.MsSql" />
+    <PackageReference Include="Testcontainers.RabbitMq" />
   </ItemGroup>
 
   <ItemGroup>
@@ -18,9 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\ProposalService.Domain\ProposalService.Domain.csproj" />
-    <ProjectReference Include="..\..\src\ProposalService.Application\ProposalService.Application.csproj" />
-    <ProjectReference Include="..\..\..\..\building-blocks\ConsignadoHub.Contracts\ConsignadoHub.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\ProposalService.Api\ProposalService.Api.csproj" />
   </ItemGroup>
 
 </Project>
