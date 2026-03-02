@@ -11,8 +11,6 @@ public sealed class ProposalTimelineEntry
     public DateTimeOffset OccurredAt { get; private set; }
     public string? Reason { get; private set; }
 
-    private ProposalTimelineEntry() { }
-
     internal ProposalTimelineEntry(
         Guid id,
         Guid proposalId,

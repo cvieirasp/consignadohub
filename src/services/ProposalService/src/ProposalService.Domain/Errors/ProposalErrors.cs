@@ -1,4 +1,5 @@
 using ConsignadoHub.BuildingBlocks.Results;
+using ProposalService.Domain.Enums;
 
 namespace ProposalService.Domain.Errors;
 
@@ -15,4 +16,8 @@ public static class ProposalErrors
 
     public static Error ValidationFailed(string message = "One or more validation errors occurred.") =>
         new("Proposal.Validation", message);
+
+    public static Error InvalidStatusTransition(ProposalStatus current, ProposalStatus target) =>
+        new("Proposal.InvalidStatusTransition",
+            $"Cannot transition from '{current}' to '{target}'. Current status is terminal.");
 }

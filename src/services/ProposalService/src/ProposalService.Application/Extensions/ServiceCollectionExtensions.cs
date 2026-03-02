@@ -23,6 +23,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<GetProposalByIdUseCase>();
         services.AddScoped<GetProposalTimelineUseCase>();
         services.AddScoped<ListProposalsByCustomerUseCase>();
+        services.AddScoped<HandleCreditAnalysisCompletedUseCase>();
+        services.AddScoped<HandleContractGeneratedUseCase>();
+        services.AddScoped<HandleDisbursementCompletedUseCase>();
 
         services.AddScoped<IValidator<SubmitProposalInput>, SubmitProposalValidator>();
 

@@ -10,7 +10,18 @@ internal sealed class ProposalTimelineConfiguration : IEntityTypeConfiguration<P
     {
         builder.ToTable("ProposalTimeline");
 
+        // Same reasoning as ProposalConfiguration: private set properties require
+        // PropertyAccessMode.Property so EF Core uses reflection-based setter
+        // instead of the compiled field accessor during materialization.
+        builder.UsePropertyAccessMode(PropertyAccessMode.Property);
+
         builder.HasKey(t => t.Id);
+
+        // Id is always generated client-side (Guid.NewGuid() in the constructor).
+        // ValueGeneratedNever tells EF Core not to treat a non-default Guid as
+        // "already persisted", so new entries found during DetectChanges are
+        // correctly tracked as Added (INSERT) rather than Unchanged/Modified (UPDATE).
+        builder.Property(t => t.Id).ValueGeneratedNever();
 
         builder.Property(t => t.ProposalId).IsRequired();
         builder.Property(t => t.FromStatus).HasConversion<int?>().IsRequired(false);

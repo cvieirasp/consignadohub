@@ -1,4 +1,7 @@
+using ConsignadoHub.BuildingBlocks.Messaging;
+using ConsignadoHub.BuildingBlocks.Messaging.Outbox;
 using ConsignadoHub.BuildingBlocks.Results;
+using ConsignadoHub.Contracts.Events;
 using FluentValidation;
 using Microsoft.Extensions.Options;
 using ProposalService.Application.Configuration;
@@ -11,6 +14,7 @@ namespace ProposalService.Application.UseCases;
 
 public sealed class SubmitProposalUseCase(
     IProposalRepository repository,
+    IOutboxRepository outboxRepository,
     IValidator<SubmitProposalInput> validator,
     IOptions<ProposalSettings> settings)
 {
@@ -20,7 +24,7 @@ public sealed class SubmitProposalUseCase(
     {
         var validation = await validator.ValidateAsync(input, ct);
         if (!validation.IsValid)
-            return ProposalErrors.ValidationFailed(string.Join(" | ", validation.Errors.Select(e => e.ErrorMessage))); ;
+            return ProposalErrors.ValidationFailed(string.Join(" | ", validation.Errors.Select(e => e.ErrorMessage)));
 
         if (input.RequestedAmount < 100m || input.RequestedAmount > 500_000m)
             return ProposalErrors.InvalidAmount;
@@ -33,7 +37,18 @@ public sealed class SubmitProposalUseCase(
 
         proposal.AddTimelineEntry(null, proposal.Status);
 
+        var @event = new ProposalSubmittedEvent(
+            proposal.Id,
+            proposal.CustomerId,
+            proposal.RequestedAmount,
+            proposal.TermMonths);
+
+        var outboxMessage = OutboxMessage.Create(@event, "proposal.submitted");
+
         await repository.AddAsync(proposal, ct);
+        await outboxRepository.AddAsync(outboxMessage, ct);
+
+        // Proposal + outbox message saved atomically in the same DbContext transaction
         await repository.SaveChangesAsync(ct);
 
         return proposal.Id;

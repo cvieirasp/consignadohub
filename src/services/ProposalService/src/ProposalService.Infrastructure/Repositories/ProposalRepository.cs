@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using ProposalService.Application.Exceptions;
 using ProposalService.Application.Ports;
 using ProposalService.Domain.Entities;
 using ProposalService.Domain.Enums;
@@ -10,6 +11,11 @@ internal sealed class ProposalRepository(ProposalDbContext db) : IProposalReposi
 {
     public async Task<Proposal?> GetByIdAsync(Guid id, CancellationToken ct = default) =>
         await db.Proposals.AsNoTracking().FirstOrDefaultAsync(p => p.Id == id, ct);
+
+    public async Task<Proposal?> GetByIdForUpdateAsync(Guid id, CancellationToken ct = default) =>
+        await db.Proposals
+            .Include(p => p.Timeline)
+            .FirstOrDefaultAsync(p => p.Id == id, ct);
 
     public async Task<Proposal?> GetByIdWithTimelineAsync(Guid id, CancellationToken ct = default) =>
         await db.Proposals
@@ -39,5 +45,19 @@ internal sealed class ProposalRepository(ProposalDbContext db) : IProposalReposi
         await db.Proposals.AddAsync(proposal, ct);
 
     public async Task SaveChangesAsync(CancellationToken ct = default) =>
-        await db.SaveChangesAsync(ct);
+        await SaveWithConcurrencyHandlingAsync(ct);
+
+    private async Task SaveWithConcurrencyHandlingAsync(CancellationToken ct)
+    {
+        try
+        {
+            await db.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            throw new ProposalConcurrencyException(
+                "Proposal update failed due to a concurrency conflict.",
+                ex);
+        }
+    }
 }

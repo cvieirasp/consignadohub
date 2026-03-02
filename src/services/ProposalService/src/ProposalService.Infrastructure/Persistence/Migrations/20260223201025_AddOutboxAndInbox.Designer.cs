@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProposalService.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using ProposalService.Infrastructure.Persistence;
 namespace ProposalService.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ProposalDbContext))]
-    partial class ProposalDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260223201025_AddOutboxAndInbox")]
+    partial class AddOutboxAndInbox
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -135,6 +138,7 @@ namespace ProposalService.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("ProposalService.Domain.Entities.ProposalTimelineEntry", b =>
                 {
                     b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int?>("FromStatus")

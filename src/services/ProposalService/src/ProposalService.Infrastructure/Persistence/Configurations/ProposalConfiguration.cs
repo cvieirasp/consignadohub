@@ -11,7 +11,18 @@ internal sealed class ProposalConfiguration : IEntityTypeConfiguration<Proposal>
     {
         builder.ToTable("Proposals");
 
+        // Force property-accessor mode so EF Core uses the private setter (via reflection)
+        // instead of the compiled backing-field accessor when materialising entities.
+        // Without this, EF Core's PreferField default may leave Id as Guid.Empty on load,
+        // causing the UPDATE WHERE clause to match zero rows (DbUpdateConcurrencyException).
+        // The Timeline navigation keeps its explicit PropertyAccessMode.Field override below.
+        builder.UsePropertyAccessMode(PropertyAccessMode.Property);
+
         builder.HasKey(p => p.Id);
+
+        // Explicitly force property access for Id to avoid Guid.Empty on materialization.
+        builder.Property(p => p.Id)
+            .UsePropertyAccessMode(PropertyAccessMode.Property);
 
         builder.Property(p => p.CustomerId).IsRequired();
         builder.Property(p => p.RequestedAmount).IsRequired().HasPrecision(18, 2);

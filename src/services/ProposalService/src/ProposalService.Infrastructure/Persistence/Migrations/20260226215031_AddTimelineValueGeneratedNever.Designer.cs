@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProposalService.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using ProposalService.Infrastructure.Persistence;
 namespace ProposalService.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ProposalDbContext))]
-    partial class ProposalDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260226215031_AddTimelineValueGeneratedNever")]
+    partial class AddTimelineValueGeneratedNever
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

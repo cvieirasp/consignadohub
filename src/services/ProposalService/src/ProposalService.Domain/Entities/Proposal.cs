@@ -1,3 +1,5 @@
+using ConsignadoHub.BuildingBlocks.Results;
+using ProposalService.Domain.Errors;
 using ProposalService.Domain.Enums;
 
 namespace ProposalService.Domain.Entities;
@@ -44,6 +46,25 @@ public sealed class Proposal
     public void AddTimelineEntry(ProposalStatus? fromStatus, ProposalStatus toStatus, string? reason = null)
     {
         _timeline.Add(new ProposalTimelineEntry(Guid.NewGuid(), Id, fromStatus, toStatus, DateTimeOffset.UtcNow, reason));
+    }
+
+    private static readonly HashSet<ProposalStatus> TerminalStatuses =
+    [
+        ProposalStatus.Rejected,
+        ProposalStatus.Disbursed,
+    ];
+
+    public Result UpdateStatus(ProposalStatus newStatus, string? reason = null)
+    {
+        if (TerminalStatuses.Contains(Status))
+            return ProposalErrors.InvalidStatusTransition(Status, newStatus);
+
+        var previous = Status;
+        Status = newStatus;
+        UpdatedAt = DateTimeOffset.UtcNow;
+        AddTimelineEntry(previous, newStatus, reason);
+
+        return Result.Success();
     }
 
     /// <summary>PMT = PV * r / (1 - (1+r)^-n)</summary>
