@@ -2,18 +2,32 @@ name: CI
 
 on:
   push:
-    branches: ["main", "develop"]
+    branches: [main, develop]
   pull_request:
-    branches: ["main", "develop"]
+    branches: [main, develop]
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   DOTNET_VERSION: "10.0.x"
-  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
-  DOTNET_NOLOGO: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: "true"
+  DOTNET_NOLOGO: "true"
+  DOTNET_CLI_TELEMETRY_OPTOUT: "true"
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
 
 jobs:
-  build-and-test:
-    name: Build & Unit Tests
+  # ─────────────────────────────────────────────
+  # Job 1 — Restore + Build (fast fail gate)
+  # ─────────────────────────────────────────────
+  build:
+    name: Build
     runs-on: ubuntu-latest
 
     steps:
@@ -25,30 +39,196 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Restore dependencies
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/Directory.Packages.props', '**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Restore
         run: dotnet restore
 
       - name: Build
         run: dotnet build --no-restore --configuration Release
 
-      - name: Run unit tests
-        run: >
-          dotnet test --no-build --configuration Release
-          --filter "Category=Unit|FullyQualifiedName!~IntegrationTests"
-          --logger "trx;LogFileName=test-results.trx"
-          --results-directory ./test-results
-          --collect:"XPlat Code Coverage"
+  # ─────────────────────────────────────────────
+  # Job 2 — Unit Tests + Coverage
+  # ─────────────────────────────────────────────
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: build
 
-      - name: Upload test results
-        uses: actions/upload-artifact@v4
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET ${{ env.DOTNET_VERSION }}
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/Directory.Packages.props', '**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Run unit tests
+        run: |
+          dotnet test --no-restore --configuration Release \
+            --filter "Category=Unit|FullyQualifiedName!~IntegrationTests" \
+            --logger "trx;LogFileName=unit-results.trx" \
+            --results-directory "${{ runner.temp }}/test-results/unit" \
+            --collect:"XPlat Code Coverage" \
+            -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
+
+      - name: Publish test results
+        uses: dorny/test-reporter@v1
         if: always()
         with:
-          name: test-results
-          path: ./test-results/**/*.trx
+          name: Unit Tests
+          path: "${{ runner.temp }}/test-results/unit/**/*.trx"
+          reporter: dotnet-trx
+          fail-on-error: true
 
       - name: Upload coverage reports
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: coverage-reports
-          path: ./test-results/**/coverage.cobertura.xml
+          name: unit-coverage
+          path: "${{ runner.temp }}/test-results/unit/**/coverage.cobertura.xml"
+          retention-days: 7
+
+  # ─────────────────────────────────────────────
+  # Job 3 — Integration Tests (Testcontainers)
+  #         Milestone 4 — non-blocking until implemented
+  # ─────────────────────────────────────────────
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET ${{ env.DOTNET_VERSION }}
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/Directory.Packages.props', '**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Run integration tests
+        env:
+          DOTNET_ENVIRONMENT: Test
+        run: |
+          dotnet test --no-restore --configuration Release \
+            --filter "Category=Integration|FullyQualifiedName~IntegrationTests" \
+            --logger "trx;LogFileName=integration-results.trx" \
+            --results-directory "${{ runner.temp }}/test-results/integration" \
+            --collect:"XPlat Code Coverage" \
+            -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
+
+      - name: Publish test results
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Integration Tests
+          path: "${{ runner.temp }}/test-results/integration/**/*.trx"
+          reporter: dotnet-trx
+          fail-on-error: true
+
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: integration-coverage
+          path: "${{ runner.temp }}/test-results/integration/**/coverage.cobertura.xml"
+          retention-days: 7
+
+  # ─────────────────────────────────────────────
+  # Job 4 — SonarCloud Static Analysis
+  #         Skipped for pull requests from forks
+  # ─────────────────────────────────────────────
+  sonar:
+    name: SonarCloud Analysis
+    runs-on: ubuntu-latest
+    needs: [unit-tests]
+    if: >-
+      github.event_name == 'push' ||
+      (github.event_name == 'pull_request' &&
+       github.event.pull_request.head.repo.full_name == github.repository)
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history required for SonarCloud blame analysis
+
+      - name: Setup .NET ${{ env.DOTNET_VERSION }}
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/Directory.Packages.props', '**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Cache SonarCloud scanner
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: sonar-${{ runner.os }}
+          restore-keys: sonar-${{ runner.os }}-
+
+      - name: Download unit coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: unit-coverage
+          path: ./coverage
+
+      - name: Install SonarCloud scanner
+        run: dotnet tool install --global dotnet-sonarscanner
+
+      - name: Begin SonarCloud analysis
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          dotnet sonarscanner begin \
+            /k:"cvieirasp_consignadohub" \
+            /o:"cvieirasp" \
+            /d:sonar.host.url="https://sonarcloud.io" \
+            /d:sonar.token="$SONAR_TOKEN" \
+            /d:sonar.cs.opencover.reportsPaths="./coverage/**/coverage.cobertura.xml" \
+            /d:sonar.exclusions="**/Migrations/**,**/obj/**,**/bin/**" \
+            /d:sonar.coverage.exclusions="**/Migrations/**,**/*Tests*/**,**/Program.cs"
+
+      - name: Restore and Build
+        run: |
+          dotnet restore
+          dotnet build --no-restore --configuration Release
+
+      - name: End SonarCloud analysis
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: dotnet sonarscanner end /d:sonar.token="$SONAR_TOKEN"

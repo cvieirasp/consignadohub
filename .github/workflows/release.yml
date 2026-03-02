@@ -1,0 +1,314 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+
+env:
+  DOTNET_VERSION: "10.0.x"
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: "true"
+  DOTNET_NOLOGO: "true"
+  DOTNET_CLI_TELEMETRY_OPTOUT: "true"
+  REGISTRY: ghcr.io
+  IMAGE_OWNER: ${{ github.repository_owner }}
+
+permissions:
+  contents: write  # Create GitHub Release
+  packages: write  # Push to GHCR
+  id-token: write  # OIDC for provenance attestation
+
+jobs:
+  # ─────────────────────────────────────────────
+  # Job 1 — Validate: Build + Unit Tests
+  # ─────────────────────────────────────────────
+  validate:
+    name: Validate Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET ${{ env.DOTNET_VERSION }}
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/Directory.Packages.props', '**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Run unit tests
+        run: |
+          dotnet test --no-restore --configuration Release \
+            --filter "Category=Unit|FullyQualifiedName!~IntegrationTests" \
+            --logger "trx;LogFileName=unit-results.trx" \
+            --results-directory "${{ runner.temp }}/test-results"
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: release-test-results
+          path: "${{ runner.temp }}/test-results/**/*.trx"
+          retention-days: 30
+
+  # ─────────────────────────────────────────────
+  # Job 2a — Docker: CustomerService
+  # ─────────────────────────────────────────────
+  docker-customer:
+    name: Docker — CustomerService
+    runs-on: ubuntu-latest
+    needs: validate
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/consignadohub-customer
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha,format=short
+          labels: |
+            org.opencontainers.image.title=ConsignadoHub - CustomerService
+            org.opencontainers.image.description=Customer registration and lookup service
+            org.opencontainers.image.vendor=cvieirasp
+
+      - name: Build and push CustomerService image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: src/services/CustomerService/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=customer
+          cache-to: type=gha,scope=customer,mode=max
+          platforms: linux/amd64,linux/arm64
+          provenance: true
+          sbom: true
+
+  # ─────────────────────────────────────────────
+  # Job 2b — Docker: ProposalService
+  # ─────────────────────────────────────────────
+  docker-proposal:
+    name: Docker — ProposalService
+    runs-on: ubuntu-latest
+    needs: validate
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/consignadohub-proposal
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha,format=short
+          labels: |
+            org.opencontainers.image.title=ConsignadoHub - ProposalService
+            org.opencontainers.image.description=Proposal simulation, submission, and workflow service
+            org.opencontainers.image.vendor=cvieirasp
+
+      - name: Build and push ProposalService image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: src/services/ProposalService/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=proposal
+          cache-to: type=gha,scope=proposal,mode=max
+          platforms: linux/amd64,linux/arm64
+          provenance: true
+          sbom: true
+
+  # ─────────────────────────────────────────────
+  # Job 2c — Docker: WorkflowWorker
+  # ─────────────────────────────────────────────
+  docker-workflow:
+    name: Docker — WorkflowWorker
+    runs-on: ubuntu-latest
+    needs: validate
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/consignadohub-workflow
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha,format=short
+          labels: |
+            org.opencontainers.image.title=ConsignadoHub - WorkflowWorker
+            org.opencontainers.image.description=Asynchronous workflow worker for credit analysis, contract generation, and disbursement
+            org.opencontainers.image.vendor=cvieirasp
+
+      - name: Build and push WorkflowWorker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: src/services/WorkflowWorker/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=workflow
+          cache-to: type=gha,scope=workflow,mode=max
+          platforms: linux/amd64,linux/arm64
+          provenance: true
+          sbom: true
+
+  # ─────────────────────────────────────────────
+  # Job 2d — Docker: NotificationService
+  # ─────────────────────────────────────────────
+  docker-notification:
+    name: Docker — NotificationService
+    runs-on: ubuntu-latest
+    needs: validate
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/consignadohub-notification
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha,format=short
+          labels: |
+            org.opencontainers.image.title=ConsignadoHub - NotificationService
+            org.opencontainers.image.description=Fan-out notification consumer for email and webhook side effects
+            org.opencontainers.image.vendor=cvieirasp
+
+      - name: Build and push NotificationService image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: src/services/NotificationService/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=notification
+          cache-to: type=gha,scope=notification,mode=max
+          platforms: linux/amd64,linux/arm64
+          provenance: true
+          sbom: true
+
+  # ─────────────────────────────────────────────
+  # Job 3 — GitHub Release with auto-generated notes
+  # ─────────────────────────────────────────────
+  github-release:
+    name: GitHub Release
+    runs-on: ubuntu-latest
+    needs: [docker-customer, docker-proposal, docker-workflow, docker-notification]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download test results
+        uses: actions/download-artifact@v4
+        with:
+          name: release-test-results
+          path: ./artifacts/tests
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          make_latest: true
+          files: |
+            artifacts/tests/**/*.trx
+          body: |
+            ## Docker Images
+
+            | Service | Image |
+            |---|---|
+            | CustomerService | `ghcr.io/${{ env.IMAGE_OWNER }}/consignadohub-customer:${{ github.ref_name }}` |
+            | ProposalService | `ghcr.io/${{ env.IMAGE_OWNER }}/consignadohub-proposal:${{ github.ref_name }}` |
+            | WorkflowWorker | `ghcr.io/${{ env.IMAGE_OWNER }}/consignadohub-workflow:${{ github.ref_name }}` |
+            | NotificationService | `ghcr.io/${{ env.IMAGE_OWNER }}/consignadohub-notification:${{ github.ref_name }}` |
+
+            ## Quick Start
+
+            ```bash
+            docker pull ghcr.io/${{ env.IMAGE_OWNER }}/consignadohub-customer:${{ github.ref_name }}
+            docker pull ghcr.io/${{ env.IMAGE_OWNER }}/consignadohub-proposal:${{ github.ref_name }}
+            docker pull ghcr.io/${{ env.IMAGE_OWNER }}/consignadohub-workflow:${{ github.ref_name }}
+            docker pull ghcr.io/${{ env.IMAGE_OWNER }}/consignadohub-notification:${{ github.ref_name }}
+            ```
