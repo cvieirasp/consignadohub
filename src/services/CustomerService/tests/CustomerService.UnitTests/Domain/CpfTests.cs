@@ -48,4 +48,20 @@ public sealed class CpfTests
         var cpf2 = Cpf.Create("52998224725");
         cpf1.Should().Be(cpf2);
     }
+
+    [Theory]
+    [InlineData("52998224735")] // first check digit changed from 2 to 3
+    [InlineData("52998224745")] // first check digit changed from 2 to 4
+    public void IsValid_ShouldReturnFalse_WhenFirstCheckDigitIsWrong(string cpf)
+    {
+        Cpf.IsValid(cpf).Should().BeFalse();
+    }
+
+    [Theory]
+    [InlineData("52998224726")] // second check digit changed from 5 to 6
+    [InlineData("52998224727")] // second check digit changed from 5 to 7
+    public void IsValid_ShouldReturnFalse_WhenSecondCheckDigitIsWrong(string cpf)
+    {
+        Cpf.IsValid(cpf).Should().BeFalse();
+    }
 }

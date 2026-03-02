@@ -34,8 +34,14 @@ public sealed class GetCustomerByIdUseCaseTests
         var result = await _useCase.ExecuteAsync(customer.Id);
 
         result.IsSuccess.Should().BeTrue();
-        result.Value!.FullName.Should().Be("Jane Doe");
+        result.Value!.Id.Should().Be(customer.Id);
+        result.Value.FullName.Should().Be("Jane Doe");
         result.Value.Email.Should().Be("jane@example.com");
+        result.Value.Cpf.Should().Be("52998224725");
+        result.Value.Phone.Should().Be("11999990000");
+        result.Value.BirthDate.Should().Be(new DateOnly(1985, 5, 15));
+        result.Value.CreatedAt.Should().BeCloseTo(customer.CreatedAt, TimeSpan.FromSeconds(1));
+        result.Value.IsActive.Should().BeTrue();
     }
 
     [Fact]
