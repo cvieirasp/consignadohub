@@ -1,7 +1,7 @@
 # ADR-008: Consumer prefetchCount=1 for Sequential Message Processing
 
 **Status:** Accepted
-**Date:** 2026-02-26
+**Date:** 26/02/2026
 
 ## Context
 
@@ -21,7 +21,7 @@ Thread B:  ExistsAsync → false ── load proposal ── ... ─── SaveC
 Both threads read "not yet processed" from the inbox before either commits. The second thread's
 `SaveChangesAsync` fails with a unique constraint violation on `(EventId, ConsumerName)`, which EF
 Core surfaces as `DbUpdateException`. Because the base consumer NACKs with `requeue: false` on any
-exception, the message is sent to the DLQ — even though the event was successfully processed by the
+exception, the message is sent to the DLQ - even though the event was successfully processed by the
 first thread.
 
 The proposal workflow is a **sequential state machine** (`Submitted → Approved/Rejected → Contract
@@ -44,7 +44,7 @@ serialising processing within a single instance.
 ### Catch `DbUpdateException` and re-check the inbox (rejected)
 
 Re-check the inbox after the exception; return success if the entry now exists. This prevents the DLQ
-but does not eliminate the race — two threads still run concurrently, write the proposal state twice,
+but does not eliminate the race - two threads still run concurrently, write the proposal state twice,
 and add duplicate timeline entries. It couples the Application layer to an EF Core exception type and
 adds a second round-trip on the failure path. Treating a race condition as a recoverable exception is
 a symptom fix, not a root-cause fix.
@@ -81,7 +81,7 @@ consumers. This is the preferred scaling strategy for this domain.
 - **Simplicity:** No changes required to use-case logic, repository layer, or exception handling.
   The fix is a single line in the shared infrastructure base class.
 - **Applies to all consumers:** `prefetchCount: 1` affects every consumer that extends
-  `RabbitMqConsumerBase<TEvent>`. This is intentional — all consumers in this system share the same
+  `RabbitMqConsumerBase<TEvent>`. This is intentional - all consumers in this system share the same
   sequential-state-machine semantics where correctness outweighs per-instance concurrency.
 
 ## Post-Decision: Separate EF Core Tracking Bug
@@ -96,8 +96,8 @@ non-default Guid) to the `_timeline` field, EF Core's `DetectChanges()` found th
 navigation baseline. Because `ProposalTimelineEntry.Id` was `ValueGeneratedOnAdd()` by convention,
 EF Core could not distinguish "just created" from "already persisted" and tracked the entry as
 `Unchanged`. Relationship fixup then set `ProposalId` (already the correct value), transitioning the
-entry to `Modified`. EF Core generated `UPDATE [ProposalTimeline] ... WHERE [Id] = @newGuid` — the
-row does not exist yet — `@@ROWCOUNT = 0` → `DbUpdateConcurrencyException`.
+entry to `Modified`. EF Core generated `UPDATE [ProposalTimeline] ... WHERE [Id] = @newGuid` - the
+row does not exist yet - `@@ROWCOUNT = 0` → `DbUpdateConcurrencyException`.
 
 **Fixes applied (infrastructure layer):**
 

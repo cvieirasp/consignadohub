@@ -1,7 +1,7 @@
 # ADR-005: Observability with OpenTelemetry
 
 **Status:** Accepted
-**Date:** 2026-03-01
+**Date:** 01/03/2026
 
 ## Context
 
@@ -29,9 +29,9 @@ Adopt **OpenTelemetry (OTel) .NET SDK 1.15.0** as the single observability frame
 
 The RabbitMQ .NET client does not include native OTel instrumentation. Manual spans are created in the building blocks:
 
-- **`RabbitMqEventPublisher.PublishRawAsync`** — `ActivityKind.Producer` span with tags:
+- **`RabbitMqEventPublisher.PublishRawAsync`** - `ActivityKind.Producer` span with tags:
   `messaging.system=rabbitmq`, `messaging.destination`, `messaging.rabbitmq.routing_key`
-- **`RabbitMqConsumerBase`** — `ActivityKind.Consumer` span per message with tags:
+- **`RabbitMqConsumerBase`** - `ActivityKind.Consumer` span per message with tags:
   `messaging.system=rabbitmq`, `messaging.destination`, `messaging.consumer`, `messaging.message_id`, `messaging.correlation_id`
 
 Error status (`ActivityStatusCode.Error`) is set on the span when message processing fails.
@@ -53,7 +53,7 @@ The `serviceName` parameter sets the `service.name` resource attribute, making t
 
 ### W3C Trace Context Propagation
 
-The OTel SDK defaults to W3C `traceparent`/`tracestate` header propagation. For RabbitMQ messages, trace context is not automatically propagated through AMQP headers in this implementation — the `CorrelationId` carried in each `IIntegrationEvent` serves as the cross-service correlation identifier, visible in both logs and span attributes.
+The OTel SDK defaults to W3C `traceparent`/`tracestate` header propagation. For RabbitMQ messages, trace context is not automatically propagated through AMQP headers in this implementation - the `CorrelationId` carried in each `IIntegrationEvent` serves as the cross-service correlation identifier, visible in both logs and span attributes.
 
 ## Consequences
 

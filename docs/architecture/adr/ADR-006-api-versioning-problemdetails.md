@@ -1,7 +1,7 @@
 # ADR-006: API Versioning + ProblemDetails Error Contract
 
 **Status:** Accepted
-**Date:** 2026-02-20
+**Date:** 20/02/2026
 
 ## Context
 
@@ -11,7 +11,7 @@ APIs must be versioned from day one to support future non-breaking evolution. Er
 
 ### Versioning
 
-- **URL-based versioning** (`/v1/...`) — simple, unambiguous, and cache-friendly.
+- **URL-based versioning** (`/v1/...`) - simple, unambiguous, and cache-friendly.
 - Library: `Asp.Versioning.Http` + `Asp.Versioning.ApiExplorer`.
 - Default version: `1.0`. Unknown versions return 400.
 
@@ -19,8 +19,8 @@ APIs must be versioned from day one to support future non-breaking evolution. Er
 
 - All errors use **RFC 7807 ProblemDetails**, including validation errors.
 - Extended with custom fields:
-  - `errorCode` — machine-readable error code (e.g. `Customer.NotFound`)
-  - `correlationId` — propagated from `X-Correlation-Id` header for observability
+  - `errorCode` - machine-readable error code (e.g. `Customer.NotFound`)
+  - `correlationId` - propagated from `X-Correlation-Id` header for observability
 - HTTP status mapping by error code suffix:
   | Suffix | HTTP Status |
   |---|---|
@@ -59,7 +59,7 @@ options.AddDocumentTransformer((document, _, _) =>
 app.MapScalarApiReference(options =>
 {
     options
-        .WithTitle("ConsignadoHub — <Service> API")
+        .WithTitle("ConsignadoHub - <Service> API")
         .WithPreferredScheme("BearerAuth")
         .WithHttpBearerAuthentication(bearer => bearer.Token = string.Empty);
 });

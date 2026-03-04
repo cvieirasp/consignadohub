@@ -1,22 +1,19 @@
 # ADR-004: Keycloak OIDC Authentication and RBAC Authorization
 
-## Status
-Accepted
-
-## Date
-2026-02-28
+**Status:** Accepted
+**Date:** 28/02/2026
 
 ## Context
 The ConsignadoHub APIs (CustomerService, ProposalService) require authentication and authorization to protect domain operations. The system needs:
-- A standard, widely-adopted identity protocol (OIDC/OAuth2)
-- Role-based access control (RBAC) for differentiating admin vs analyst access
-- JWT Bearer token validation in ASP.NET Core without maintaining user stores in each service
-- Local development support with minimal friction
+- A standard, widely-adopted identity protocol (OIDC/OAuth2).
+- Role-based access control (RBAC) for differentiating admin vs analyst access.
+- JWT Bearer token validation in ASP.NET Core without maintaining user stores in each service.
+- Local development support with minimal friction.
 
 Options considered:
-1. **ASP.NET Core Identity** — embeds user management in the service; unsuitable for microservices
-2. **Azure AD / Entra ID** — requires Azure subscription; not portable for local dev
-3. **Keycloak** — open-source IdP, self-hosted, supports OIDC, realm-based multi-tenancy, and Docker-friendly
+1. **ASP.NET Core Identity** - embeds user management in the service; unsuitable for microservices.
+2. **Azure AD / Entra ID** - requires Azure subscription; not portable for local dev.
+3. **Keycloak** - open-source IdP, self-hosted, supports OIDC, realm-based multi-tenancy, and Docker-friendly.
 
 ## Decision
 Use **Keycloak** as the central Identity Provider (IdP) with **JWT Bearer** token validation in each API service.
@@ -28,7 +25,7 @@ Use **Keycloak** as the central Identity Provider (IdP) with **JWT Bearer** toke
 - **Realm roles**: `consignado-admin`, `consignado-analyst`
 
 ### Token Validation
-Each API service validates JWT tokens using `Microsoft.AspNetCore.Authentication.JwtBearer` (must be added as an explicit NuGet package — it was removed from the `Microsoft.AspNetCore.App` shared framework in .NET 7+). The extension method `AddKeycloakAuthentication` in `ConsignadoHub.BuildingBlocks` reads the `Keycloak` configuration section and registers:
+Each API service validates JWT tokens using `Microsoft.AspNetCore.Authentication.JwtBearer` (must be added as an explicit NuGet package - it was removed from the `Microsoft.AspNetCore.App` shared framework in .NET 7+). The extension method `AddKeycloakAuthentication` in `ConsignadoHub.BuildingBlocks` reads the `Keycloak` configuration section and registers:
 - `AddAuthentication(JwtBearerDefaults.AuthenticationScheme)`
 - `AddJwtBearer` with `Authority`, `Audience`, and `RequireHttpsMetadata`
 
@@ -77,7 +74,7 @@ Two named policies are defined in `AddKeycloakAuthentication` via `services.AddA
 UseExceptionHandler()
 UseStatusCodePages()
 UseCorrelationId()
-UseAuthentication()    ← must be before UseAuthorization
+UseAuthentication() - must be before UseAuthorization
 UseAuthorization()
 UseSerilogRequestLogging()
 ```
@@ -91,7 +88,7 @@ These are worker services (no public HTTP endpoints) and do not require JWT vali
 | admin-user    | admin123    | consignado-admin    |
 | analyst-user  | analyst123  | consignado-analyst  |
 
-### Option 1 — Scalar Bearer Token UI (recommended for dev)
+### Option 1 - Scalar Bearer Token UI (recommended for dev)
 
 Both APIs expose a Bearer Token input field directly in the Scalar UI (see ADR-006). Workflow:
 
@@ -100,7 +97,7 @@ Both APIs expose a Bearer Token input field directly in the Scalar UI (see ADR-0
 3. Click **Authentication** → paste the `access_token` value.
 4. All subsequent requests in Scalar will include `Authorization: Bearer <token>`.
 
-### Option 2 — curl (scripting / CI)
+### Option 2 - curl (scripting / CI)
 
 ```bash
 curl -X POST http://localhost:8080/realms/consignadohub/protocol/openid-connect/token \
@@ -123,7 +120,7 @@ Production deployments should set `RequireHttpsMetadata: true` and point `Author
 ## Consequences
 ### Positive
 - Single source of truth for identity; no per-service user stores
-- Standard OIDC/JWT approach — familiar to any ASP.NET Core developer
+- Standard OIDC/JWT approach - familiar to any ASP.NET Core developer
 - Local dev realm auto-imported via Docker volume mount (`--import-realm`)
 - Fine-grained RBAC implemented via named policies (`AdminOnly`, `AnalystOrAdmin`) applied per-endpoint
 

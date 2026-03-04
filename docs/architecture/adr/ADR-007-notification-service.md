@@ -1,7 +1,7 @@
 # ADR-007: NotificationService as Fan-out Side-Effects Consumer
 
 **Status:** Accepted
-**Date:** 2026-02-26
+**Date:** 26/02/2026
 
 ## Context
 
@@ -37,7 +37,7 @@ A dedicated **NotificationService** (Worker) consumes all four integration event
 ### Separation of concerns
 
 - NotificationService **reads** events but **never writes** back to the domain.
-- It has no REST API surface — it is a consumer-only worker.
+- It has no REST API surface - it is a consumer-only worker.
 - It can fail or restart without affecting the proposal state machine in ProposalService or WorkflowWorker.
 
 ## Consequences

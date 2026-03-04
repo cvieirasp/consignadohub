@@ -1,7 +1,7 @@
 # ADR-003: EF Core + SQL Server
 
 **Status:** Accepted
-**Date:** 2026-02-20
+**Date:** 20/02/2026
 
 ## Context
 
@@ -15,7 +15,7 @@ Use **EF Core 9** with **SQL Server** (Azure SQL compatible) for all services.
 - **Code-first migrations** managed per service under `Infrastructure/Persistence/Migrations/`.
 - **`AsNoTracking()`** applied to all read-only queries.
 - **`AddDbContextPool`** used for improved performance under load.
-- **Fluent API** configurations in `IEntityTypeConfiguration<T>` classes — no data annotations on domain entities.
+- **Fluent API** configurations in `IEntityTypeConfiguration<T>` classes - no data annotations on domain entities.
 - **Indices** added for all query-heavy columns: CPF (unique), FullName, CustomerId, Status.
 
 ## Consequences
@@ -23,4 +23,4 @@ Use **EF Core 9** with **SQL Server** (Azure SQL compatible) for all services.
 - Simple and productive ORM with strong .NET ecosystem support.
 - Owned migration history makes rollback and forward-only migrations straightforward.
 - EF Core adds a thin overhead vs. raw SQL; acceptable given the domain complexity.
-- Domain entities are kept clean — no EF Core attributes pollute the domain model.
+- Domain entities are kept clean - no EF Core attributes pollute the domain model.

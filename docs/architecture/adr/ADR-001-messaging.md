@@ -1,8 +1,7 @@
 # ADR-001: Messaging with RabbitMQ
 
 **Status:** Accepted
-**Date:** 2026-02-20
-**Updated:** 2026-02-26 (Milestone 3 — full event catalog documented)
+**Date:** 26/02/2026
 
 ## Context
 
@@ -28,9 +27,9 @@ The proposal workflow requires asynchronous processing across multiple stages (c
 ## Queue Naming Convention
 
 Queues are named `<service-prefix>.<routing-key>` where the prefix identifies the consuming service:
-- `proposal.*` — ProposalService (updates domain state)
-- `workflow.*` — WorkflowWorker (drives the next workflow stage)
-- `notification.*` — NotificationService (fan-out side effects only)
+- `proposal.*` - ProposalService (updates domain state)
+- `workflow.*` - WorkflowWorker (drives the next workflow stage)
+- `notification.*` - NotificationService (fan-out side effects only)
 
 ## Consequences
 
