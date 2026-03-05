@@ -4,6 +4,11 @@ using Microsoft.Extensions.Logging;
 
 namespace ConsignadoHub.BuildingBlocks.Messaging.Outbox;
 
+/// <summary>
+/// Hosted service that periodically dispatches pending messages from the outbox to the message broker.
+/// </summary>
+/// <param name="scopeFactory">The service scope factory for creating scopes.</param>
+/// <param name="logger">The logger for logging information and errors.</param>
 public sealed class OutboxDispatcherHostedService(
     IServiceScopeFactory scopeFactory,
     ILogger<OutboxDispatcherHostedService> logger) : BackgroundService

@@ -8,39 +8,39 @@ using RabbitMQ.Client.Events;
 
 namespace ConsignadoHub.BuildingBlocks.Messaging.RabbitMq;
 
-public abstract class RabbitMqConsumerBase<TEvent> : BackgroundService
+/// <summary>
+/// Base class for RabbitMQ consumers. Handles connection setup, queue declaration, 
+/// and message processing with error handling and DLQ support.
+/// </summary>
+/// <typeparam name="TEvent">The type of the integration event.</typeparam>
+public abstract class RabbitMqConsumerBase<TEvent>(
+    RabbitMqEventPublisher publisher,
+    RabbitMqSettings settings,
+    ILogger logger) : BackgroundService
     where TEvent : IIntegrationEvent
 {
-    private readonly RabbitMqEventPublisher _publisher;
-    private readonly RabbitMqSettings _settings;
-    private readonly ILogger _logger;
-
     protected abstract string QueueName { get; }
     protected abstract string RoutingKey { get; }
     protected abstract string ConsumerName { get; }
 
-    protected RabbitMqConsumerBase(
-        RabbitMqEventPublisher publisher,
-        RabbitMqSettings settings,
-        ILogger logger)
-    {
-        _publisher = publisher;
-        _settings = settings;
-        _logger = logger;
-    }
-
     protected abstract Task HandleAsync(TEvent @event, CancellationToken ct);
 
+    /// <summary>
+    /// Executes the consumer by setting up the RabbitMQ connection, declaring the necessary queues
+    /// and exchanges, and processing incoming messages with proper error handling and DLQ support.
+    /// </summary>
+    /// <param name="stoppingToken">A cancellation token to stop the consumer.</param>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("{Consumer} starting on queue '{Queue}'.", ConsumerName, QueueName);
+        logger.LogInformation("{Consumer} starting on queue '{Queue}'.", ConsumerName, QueueName);
 
-        var connection = _publisher.GetConnection();
+        var connection = publisher.GetConnection();
         using var channel = await connection.CreateChannelAsync(cancellationToken: stoppingToken);
 
-        // Declare the exchange
+        // Declare the exchange.
         await channel.ExchangeDeclareAsync(
-            exchange: _settings.ExchangeName,
+            exchange: settings.ExchangeName,
             type: "topic",
             durable: true,
             autoDelete: false,
@@ -55,13 +55,14 @@ public abstract class RabbitMqConsumerBase<TEvent> : BackgroundService
             autoDelete: false,
             cancellationToken: stoppingToken);
 
-        // Main queue with DLQ binding
+        // Main queue with DLQ binding.
         var args = new Dictionary<string, object?>
         {
             ["x-dead-letter-exchange"] = string.Empty,
             ["x-dead-letter-routing-key"] = dlqName,
         };
 
+        // Declare the main queue and bind it to the exchange with the specified routing key.
         await channel.QueueDeclareAsync(
             queue: QueueName,
             durable: true,
@@ -70,20 +71,24 @@ public abstract class RabbitMqConsumerBase<TEvent> : BackgroundService
             arguments: args,
             cancellationToken: stoppingToken);
 
+        // Bind the queue to the exchange with the routing key.
         await channel.QueueBindAsync(
             queue: QueueName,
-            exchange: _settings.ExchangeName,
+            exchange: settings.ExchangeName,
             routingKey: RoutingKey,
             cancellationToken: stoppingToken);
 
+        // Set QoS to process one message at a time.
         await channel.BasicQosAsync(prefetchSize: 0, prefetchCount: 1, global: false,
             cancellationToken: stoppingToken);
 
         var consumer = new AsyncEventingBasicConsumer(channel);
+        // Handle incoming messages asynchronously.
         consumer.ReceivedAsync += async (_, ea) =>
         {
             var body = Encoding.UTF8.GetString(ea.Body.Span);
 
+            // Start an activity for tracing the message processing.
             using var activity = MessagingActivitySource.Source.StartActivity(
                 $"{QueueName} process",
                 ActivityKind.Consumer);
@@ -98,7 +103,8 @@ public abstract class RabbitMqConsumerBase<TEvent> : BackgroundService
 
                 if (@event is null)
                 {
-                    _logger.LogWarning("{Consumer} received null event from queue '{Queue}'.", ConsumerName, QueueName);
+                    logger.LogWarning("{Consumer} received null event from queue '{Queue}'.", ConsumerName, QueueName);
+                    // Reject the message and send it to the DLQ.
                     await channel.BasicNackAsync(ea.DeliveryTag, multiple: false, requeue: false);
                     return;
                 }
@@ -106,14 +112,15 @@ public abstract class RabbitMqConsumerBase<TEvent> : BackgroundService
                 activity?.SetTag("messaging.message_id", @event.EventId.ToString());
                 activity?.SetTag("messaging.correlation_id", @event.CorrelationId.ToString());
 
-                _logger.LogInformation(
+                logger.LogInformation(
                     "Event processing started. Consumer={ConsumerName} EventId={EventId} Queue={Queue}.",
                     ConsumerName, @event.EventId, QueueName);
 
                 await HandleAsync(@event, stoppingToken);
+                // Acknowledge the message after successful processing.
                 await channel.BasicAckAsync(ea.DeliveryTag, multiple: false);
 
-                _logger.LogInformation(
+                logger.LogInformation(
                     "{Consumer} successfully processed event {EventId}.",
                     ConsumerName, @event.EventId);
             }
@@ -121,7 +128,7 @@ public abstract class RabbitMqConsumerBase<TEvent> : BackgroundService
             {
                 activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
 
-                _logger.LogError(ex,
+                logger.LogError(ex,
                     "{Consumer} failed to process message from queue '{Queue}'. Sending to DLQ.",
                     ConsumerName, QueueName);
 
@@ -129,6 +136,7 @@ public abstract class RabbitMqConsumerBase<TEvent> : BackgroundService
             }
         };
 
+        // Start consuming messages from the queue.
         await channel.BasicConsumeAsync(
             queue: QueueName,
             autoAck: false,
@@ -138,6 +146,6 @@ public abstract class RabbitMqConsumerBase<TEvent> : BackgroundService
         // Keep the service running until cancellation
         await Task.Delay(Timeout.Infinite, stoppingToken).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
 
-        _logger.LogInformation("{Consumer} stopped.", ConsumerName);
+        logger.LogInformation("{Consumer} stopped.", ConsumerName);
     }
 }

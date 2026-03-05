@@ -1,5 +1,10 @@
 namespace ConsignadoHub.BuildingBlocks.Messaging.RabbitMq;
 
+/// <summary>
+/// Configuration settings for RabbitMQ connection and exchange details. 
+/// It is a fallback to default values if not provided, ensuring that the 
+/// application can run with minimal configuration for development purposes.
+/// </summary>
 public sealed class RabbitMqSettings
 {
     public const string SectionName = "RabbitMq";

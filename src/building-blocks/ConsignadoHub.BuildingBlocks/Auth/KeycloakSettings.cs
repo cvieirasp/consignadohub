@@ -1,5 +1,8 @@
 namespace ConsignadoHub.BuildingBlocks.Auth;
 
+/// <summary>
+/// Represents the configuration settings required to integrate with Keycloak for authentication.
+/// </summary>
 public class KeycloakSettings
 {
     public const string SectionName = "Keycloak";

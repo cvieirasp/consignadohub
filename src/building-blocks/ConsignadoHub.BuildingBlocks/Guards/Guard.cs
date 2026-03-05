@@ -1,5 +1,10 @@
 namespace ConsignadoHub.BuildingBlocks.Guards;
 
+/// <summary>
+/// Provides guard clauses for validating method parameters and ensuring that they meet 
+/// certain conditions before proceeding with the execution of the method. 
+/// This helps to prevent errors and ensure that the application behaves as expected.
+/// </summary>
 public static class Guard
 {
     public static T AgainstNull<T>(T? value, string paramName) where T : class

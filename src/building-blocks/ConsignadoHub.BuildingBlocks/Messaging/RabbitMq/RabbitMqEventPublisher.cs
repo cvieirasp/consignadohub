@@ -1,11 +1,14 @@
 using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
-using System.Threading;
 using RabbitMQ.Client;
 
 namespace ConsignadoHub.BuildingBlocks.Messaging.RabbitMq;
 
+/// <summary>
+/// Implements an event publisher using RabbitMQ. It manages a single connection 
+/// and creates channels on demand for publishing messages.
+/// </summary>
 public sealed class RabbitMqEventPublisher : IEventPublisher, IAsyncDisposable
 {
     private readonly IConnection _connection;
@@ -18,6 +21,13 @@ public sealed class RabbitMqEventPublisher : IEventPublisher, IAsyncDisposable
         _settings = settings;
     }
 
+    /// <summary>
+    /// Factory method to create an instance of RabbitMqEventPublisher. 
+    /// It establishes a connection to RabbitMQ using the provided settings.
+    /// </summary>
+    /// <param name="settings">The RabbitMQ settings to use for the connection.</param>
+    /// <returns>A task that represents the asynchronous operation. 
+    /// The task result contains the created RabbitMqEventPublisher instance.</returns>
     public static async Task<RabbitMqEventPublisher> CreateAsync(RabbitMqSettings settings)
     {
         var factory = new ConnectionFactory
@@ -33,6 +43,14 @@ public sealed class RabbitMqEventPublisher : IEventPublisher, IAsyncDisposable
         return new RabbitMqEventPublisher(connection, settings);
     }
 
+    /// <summary>
+    /// Publishes an integration event to the configured RabbitMQ exchange with the specified routing key.
+    /// </summary>
+    /// <typeparam name="T">The type of the integration event.</typeparam>
+    /// <param name="event">The integration event to publish.</param>
+    /// <param name="routingKey">The routing key to use for the message.</param>
+    /// <param name="ct">A cancellation token to cancel the operation.</param>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task PublishAsync<T>(T @event, string routingKey, CancellationToken ct = default)
         where T : IIntegrationEvent
     {
@@ -40,6 +58,13 @@ public sealed class RabbitMqEventPublisher : IEventPublisher, IAsyncDisposable
         await PublishRawAsync(payload, routingKey, ct);
     }
 
+    /// <summary>
+    /// Publishes a raw JSON payload to the configured RabbitMQ exchange with the specified routing key.
+    /// </summary>
+    /// <param name="payload">The raw JSON payload to publish.</param>
+    /// <param name="routingKey">The routing key to use for the message.</param>
+    /// <param name="ct">A cancellation token to cancel the operation.</param>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task PublishRawAsync(string payload, string routingKey, CancellationToken ct = default)
     {
         using var activity = MessagingActivitySource.Source.StartActivity(
@@ -79,6 +104,11 @@ public sealed class RabbitMqEventPublisher : IEventPublisher, IAsyncDisposable
 
     public IConnection GetConnection() => _connection;
 
+    /// <summary>
+    /// Disposes the RabbitMQ connection asynchronously. It ensures that the connection
+    ///  is closed properly and resources are released.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous dispose operation.</returns>
     public async ValueTask DisposeAsync()
     {
         if (Interlocked.Exchange(ref _disposed, 1) != 0)

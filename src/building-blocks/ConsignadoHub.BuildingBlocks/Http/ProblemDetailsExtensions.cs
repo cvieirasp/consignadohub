@@ -4,6 +4,10 @@ using Microsoft.AspNetCore.Http;
 
 namespace ConsignadoHub.BuildingBlocks.Http;
 
+/// <summary>
+/// Provides extension methods for converting Error objects to HTTP results 
+/// with appropriate status codes and correlation IDs.
+/// </summary>
 public static class ProblemDetailsExtensions
 {
     private static readonly Dictionary<string, int> _errorCodeStatusMap = new(StringComparer.OrdinalIgnoreCase)
@@ -16,6 +20,13 @@ public static class ProblemDetailsExtensions
         ["Forbidden"] = StatusCodes.Status403Forbidden,
     };
 
+    /// <summary>
+    /// Converts an Error object to an HTTP result with a problem details response,
+    /// including the appropriate status code based on the error code and a correlation ID for tracing.
+    /// </summary>
+    /// <param name="error">The error object to convert.</param>
+    /// <param name="ctx">The HTTP context.</param>
+    /// <returns>An HTTP result representing the error.</returns>
     public static IResult ToHttpResult(this Error error, HttpContext ctx)
     {
         var status = ResolveStatus(error.Code);

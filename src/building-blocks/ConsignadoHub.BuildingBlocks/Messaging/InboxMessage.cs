@@ -8,6 +8,13 @@ public sealed class InboxMessage
 
     private InboxMessage() { }
 
+    /// <summary>
+    /// Creates a new InboxMessage to track the processing of an incoming event by a specific consumer. 
+    /// This helps ensure idempotency and allows us to track which events have been processed by which consumers.
+    /// </summary>
+    /// <param name="eventId">The unique identifier of the event.</param>
+    /// <param name="consumerName">The name of the consumer processing the event.</param>
+    /// <returns>A new instance of InboxMessage.</returns>
     public static InboxMessage Create(Guid eventId, string consumerName)
     {
         return new InboxMessage

@@ -1,5 +1,8 @@
 namespace ConsignadoHub.BuildingBlocks.Observability;
 
+/// <summary>
+/// Settings for OpenTelemetry observability configuration.
+/// </summary>
 public sealed class ObservabilitySettings
 {
     public const string SectionName = "OpenTelemetry";
