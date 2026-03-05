@@ -1,5 +1,5 @@
 using ConsignadoHub.BuildingBlocks.Messaging.RabbitMq;
-using ConsignadoHub.Contracts.Events;
+using WorkflowWorker.Contracts.Events;
 using Microsoft.Extensions.DependencyInjection;
 using ProposalService.Application.UseCases;
 

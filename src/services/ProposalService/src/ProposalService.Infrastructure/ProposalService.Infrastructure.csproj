@@ -10,7 +10,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ProposalService.Application\ProposalService.Application.csproj" />
-    <ProjectReference Include="..\..\..\..\building-blocks\ConsignadoHub.Contracts\ConsignadoHub.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,7 +1,7 @@
 using ConsignadoHub.BuildingBlocks.Messaging;
 using ConsignadoHub.BuildingBlocks.Messaging.Outbox;
 using ConsignadoHub.BuildingBlocks.Results;
-using ConsignadoHub.Contracts.Events;
+using ProposalService.Contracts.Events;
 using FluentValidation;
 using Microsoft.Extensions.Options;
 using ProposalService.Application.Configuration;

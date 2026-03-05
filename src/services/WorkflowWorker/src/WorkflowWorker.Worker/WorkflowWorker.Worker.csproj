@@ -18,7 +18,8 @@
   <ItemGroup>
     <ProjectReference Include="..\WorkflowWorker.Infrastructure\WorkflowWorker.Infrastructure.csproj" />
     <ProjectReference Include="..\..\..\..\building-blocks\ConsignadoHub.BuildingBlocks\ConsignadoHub.BuildingBlocks.csproj" />
-    <ProjectReference Include="..\..\..\..\building-blocks\ConsignadoHub.Contracts\ConsignadoHub.Contracts.csproj" />
+    <ProjectReference Include="..\WorkflowWorker.Contracts\WorkflowWorker.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\..\services\ProposalService\src\ProposalService.Contracts\ProposalService.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

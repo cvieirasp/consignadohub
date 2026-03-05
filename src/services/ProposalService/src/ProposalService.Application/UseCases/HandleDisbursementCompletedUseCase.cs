@@ -1,7 +1,7 @@
 using ConsignadoHub.BuildingBlocks.Messaging;
 using ConsignadoHub.BuildingBlocks.Messaging.Inbox;
 using ConsignadoHub.BuildingBlocks.Results;
-using ConsignadoHub.Contracts.Events;
+using WorkflowWorker.Contracts.Events;
 using Microsoft.Extensions.Logging;
 using ProposalService.Application.Ports;
 using ProposalService.Domain.Enums;

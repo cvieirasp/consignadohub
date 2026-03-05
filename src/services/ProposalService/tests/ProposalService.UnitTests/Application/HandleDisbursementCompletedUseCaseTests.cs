@@ -1,6 +1,6 @@
 using ConsignadoHub.BuildingBlocks.Messaging;
 using ConsignadoHub.BuildingBlocks.Messaging.Inbox;
-using ConsignadoHub.Contracts.Events;
+using WorkflowWorker.Contracts.Events;
 using FluentAssertions;
 using Moq;
 using ProposalService.Application.Ports;

@@ -20,7 +20,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\ProposalService.Domain\ProposalService.Domain.csproj" />
     <ProjectReference Include="..\..\src\ProposalService.Application\ProposalService.Application.csproj" />
-    <ProjectReference Include="..\..\..\..\building-blocks\ConsignadoHub.Contracts\ConsignadoHub.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\..\services\WorkflowWorker\src\WorkflowWorker.Contracts\WorkflowWorker.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

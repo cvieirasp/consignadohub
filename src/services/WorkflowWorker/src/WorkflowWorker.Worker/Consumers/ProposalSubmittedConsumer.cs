@@ -1,7 +1,8 @@
 using ConsignadoHub.BuildingBlocks.Messaging;
 using ConsignadoHub.BuildingBlocks.Messaging.Inbox;
 using ConsignadoHub.BuildingBlocks.Messaging.RabbitMq;
-using ConsignadoHub.Contracts.Events;
+using ProposalService.Contracts.Events;
+using WorkflowWorker.Contracts.Events;
 using Microsoft.Extensions.DependencyInjection;
 using WorkflowWorker.Application.Handlers;
 

@@ -2,7 +2,6 @@
   <Folder Name="/src/" />
   <Folder Name="/src/building-blocks/">
     <Project Path="src/building-blocks/ConsignadoHub.BuildingBlocks/ConsignadoHub.BuildingBlocks.csproj" />
-    <Project Path="src/building-blocks/ConsignadoHub.Contracts/ConsignadoHub.Contracts.csproj" />
   </Folder>
   <Folder Name="/src/services/" />
   <Folder Name="/src/services/CustomerService/" />
@@ -18,6 +17,7 @@
   </Folder>
   <Folder Name="/src/services/ProposalService/" />
   <Folder Name="/src/services/ProposalService/src/">
+    <Project Path="src/services/ProposalService/src/ProposalService.Contracts/ProposalService.Contracts.csproj" />
     <Project Path="src/services/ProposalService/src/ProposalService.Api/ProposalService.Api.csproj" />
     <Project Path="src/services/ProposalService/src/ProposalService.Application/ProposalService.Application.csproj" />
     <Project Path="src/services/ProposalService/src/ProposalService.Domain/ProposalService.Domain.csproj" />
@@ -29,6 +29,7 @@
   </Folder>
   <Folder Name="/src/services/WorkflowWorker/" />
   <Folder Name="/src/services/WorkflowWorker/src/">
+    <Project Path="src/services/WorkflowWorker/src/WorkflowWorker.Contracts/WorkflowWorker.Contracts.csproj" />
     <Project Path="src/services/WorkflowWorker/src/WorkflowWorker.Application/WorkflowWorker.Application.csproj" />
     <Project Path="src/services/WorkflowWorker/src/WorkflowWorker.Infrastructure/WorkflowWorker.Infrastructure.csproj" />
     <Project Path="src/services/WorkflowWorker/src/WorkflowWorker.Worker/WorkflowWorker.Worker.csproj" />

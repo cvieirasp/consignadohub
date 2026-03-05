@@ -1,6 +1,6 @@
 using ConsignadoHub.BuildingBlocks.Messaging;
 
-namespace ConsignadoHub.Contracts.Events;
+namespace ProposalService.Contracts.Events;
 
 public sealed record ProposalSubmittedEvent(
     Guid ProposalId,

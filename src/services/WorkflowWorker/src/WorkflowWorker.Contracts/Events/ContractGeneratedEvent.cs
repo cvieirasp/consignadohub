@@ -1,6 +1,6 @@
 using ConsignadoHub.BuildingBlocks.Messaging;
 
-namespace ConsignadoHub.Contracts.Events;
+namespace WorkflowWorker.Contracts.Events;
 
 public sealed record ContractGeneratedEvent(
     Guid ProposalId,
