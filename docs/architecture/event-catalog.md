@@ -1,7 +1,7 @@
 # Event Catalog
 
 This document is the authoritative reference for all integration events in ConsignadoHub.
-It is derived directly from `ConsignadoHub.Contracts` and the consumer registrations across all services.
+It is derived directly from the per-publisher Contracts projects (`ProposalService.Contracts`, `WorkflowWorker.Contracts`) and the consumer registrations across all services.
 
 ---
 
@@ -69,7 +69,7 @@ It is derived directly from `ConsignadoHub.Contracts` and the consumer registrat
 
 Emitted when a customer successfully submits a credit proposal.
 
-**C# type**: `ConsignadoHub.Contracts.Events.ProposalSubmittedEvent`
+**C# type**: `ProposalService.Contracts.Events.ProposalSubmittedEvent`
 **Routing key**: `proposal.submitted`
 **Publisher**: ProposalService — written to Outbox inside the same `SaveChanges` transaction as the `Proposal` entity, then dispatched by `OutboxDispatcherHostedService`.
 
@@ -95,7 +95,7 @@ Emitted when a customer successfully submits a credit proposal.
 
 Emitted when the credit analysis step finishes (approved or rejected).
 
-**C# type**: `ConsignadoHub.Contracts.Events.CreditAnalysisCompletedEvent`
+**C# type**: `WorkflowWorker.Contracts.Events.CreditAnalysisCompletedEvent`
 **Routing key**: `proposal.credit.completed`
 **Publisher**: WorkflowWorker — `ProposalSubmittedConsumer` publishes directly (no Outbox; WorkflowWorker is stateless).
 
@@ -122,7 +122,7 @@ Emitted when the credit analysis step finishes (approved or rejected).
 
 Emitted when the contract document is generated for an approved proposal.
 
-**C# type**: `ConsignadoHub.Contracts.Events.ContractGeneratedEvent`
+**C# type**: `WorkflowWorker.Contracts.Events.ContractGeneratedEvent`
 **Routing key**: `contract.generated`
 **Publisher**: WorkflowWorker — `CreditAnalysisCompletedConsumer` publishes directly.
 
@@ -148,7 +148,7 @@ Emitted when the contract document is generated for an approved proposal.
 
 Emitted when the loan funds are disbursed to the customer. Terminal event of the happy path.
 
-**C# type**: `ConsignadoHub.Contracts.Events.DisbursementCompletedEvent`
+**C# type**: `WorkflowWorker.Contracts.Events.DisbursementCompletedEvent`
 **Routing key**: `disbursement.completed`
 **Publisher**: WorkflowWorker — `ContractGeneratedConsumer` publishes directly.
 
@@ -237,7 +237,7 @@ Submitted
 
 ## Adding a New Event (Checklist)
 
-1. Add record to `ConsignadoHub.Contracts/Events/` inheriting `IntegrationEvent`.
+1. Add record to the publisher's `*.Contracts/Events/` project (e.g. `ProposalService.Contracts` or `WorkflowWorker.Contracts`) inheriting `IntegrationEvent`. Create a new `*.Contracts` project if this is a new publisher (see ADR-009).
 2. Define a routing key (lower-kebab, e.g. `resource.verb`).
 3. Implement publisher: use `IEventPublisher.PublishAsync(event, routingKey, ct)`.
    - If published from a domain write: use the Outbox (same `SaveChanges` transaction).

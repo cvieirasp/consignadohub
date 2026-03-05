@@ -101,12 +101,13 @@ Each service follows **Clean Architecture**:
 ConsignadoHub/
 ├── src/
 │   ├── building-blocks/
-│   │   ├── ConsignadoHub.BuildingBlocks/   # Auth, messaging, outbox, observability, correlation
-│   │   └── ConsignadoHub.Contracts/        # Integration event types (shared)
+│   │   └── ConsignadoHub.BuildingBlocks/   # Auth, messaging, outbox, observability, correlation
 │   └── services/
 │       ├── CustomerService/                # Customer CRUD and search
 │       ├── ProposalService/                # Simulation, submission, workflow consumers
+│       │   └── src/ProposalService.Contracts/  # ProposalSubmittedEvent (publisher-owned)
 │       ├── WorkflowWorker/                 # Credit analysis, contract, disbursement
+│       │   └── src/WorkflowWorker.Contracts/   # CreditAnalysisCompleted, ContractGenerated, DisbursementCompleted
 │       └── NotificationService/            # Fan-out notification consumers
 ├── infra/
 │   └── local/
@@ -414,3 +415,4 @@ All images are multi-platform (`linux/amd64`, `linux/arm64`) with SBOM and prove
 | [ADR-006](docs/architecture/adr/ADR-006-api-versioning-problemdetails.md) | URL-based API versioning + RFC 7807 ProblemDetails |
 | [ADR-007](docs/architecture/adr/ADR-007-notification-service.md) | NotificationService as fan-out side-effects consumer |
 | [ADR-008](docs/architecture/adr/ADR-008-consumer-prefetch-concurrency.md) | prefetchCount=1 as the concurrency guard for consumers |
+| [ADR-009](docs/architecture/adr/ADR-009-per-publisher-contracts.md) | Publisher-owned Contracts projects instead of a shared library |
