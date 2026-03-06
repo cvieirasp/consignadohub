@@ -24,8 +24,12 @@
       "directAccessGrantsEnabled": true,
       "standardFlowEnabled": true,
       "protocol": "openid-connect",
-      "redirectUris": ["*"],
-      "webOrigins": ["*"],
+      "redirectUris": [
+        "*"
+      ],
+      "webOrigins": [
+        "*"
+      ],
       "protocolMappers": [
         {
           "name": "audience-mapper",
@@ -62,9 +66,12 @@
       "standardFlowEnabled": true,
       "protocol": "openid-connect",
       "rootUrl": "http://localhost:4200",
-      "redirectUris": ["http://localhost:4200/*"],
-      "postLogoutRedirectUris": ["http://localhost:4200"],
-      "webOrigins": ["http://localhost:4200"],
+      "redirectUris": [
+        "http://localhost:4200/*"
+      ],
+      "webOrigins": [
+        "http://localhost:4200"
+      ],
       "attributes": {
         "pkce.code.challenge.method": "S256"
       },
@@ -112,7 +119,9 @@
           "temporary": false
         }
       ],
-      "realmRoles": ["consignado-admin"]
+      "realmRoles": [
+        "consignado-admin"
+      ]
     },
     {
       "username": "analyst-user",
@@ -128,7 +137,9 @@
           "temporary": false
         }
       ],
-      "realmRoles": ["consignado-analyst"]
+      "realmRoles": [
+        "consignado-analyst"
+      ]
     }
   ]
 }
