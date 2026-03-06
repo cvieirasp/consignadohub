@@ -20,9 +20,20 @@ Use **Keycloak** as the central Identity Provider (IdP) with **JWT Bearer** toke
 
 ### Realm / Client Configuration
 - **Realm**: `consignadohub`
-- **Client**: `consignadohub-api` (public client, direct access grants enabled for dev/testing)
-- **Audience mapper**: adds `consignadohub-api` to the `aud` claim so ASP.NET Core JwtBearer validation succeeds
 - **Realm roles**: `consignado-admin`, `consignado-analyst`
+
+Two clients are registered in the realm:
+
+| Client | Type | Flow | Purpose |
+|---|---|---|---|
+| `consignadohub-api` | Public | Direct Access Grants | curl / Postman token acquisition for dev/testing |
+| `consignadohub-web` | Public | Authorization Code + PKCE (S256) | Browser SPA frontend (`http://localhost:4200`) |
+
+Both clients include:
+- **Audience mapper**: adds `consignadohub-api` to the `aud` claim so ASP.NET Core JwtBearer validation succeeds
+- **Realm roles mapper**: exposes `realm_access.roles` as the `roles` claim in the JWT
+
+`consignadohub-web` additionally enforces `pkce.code.challenge.method=S256` and restricts redirect URIs, post-logout redirect URIs, and web origins to `http://localhost:4200`.
 
 ### Token Validation
 Each API service validates JWT tokens using `Microsoft.AspNetCore.Authentication.JwtBearer` (must be added as an explicit NuGet package - it was removed from the `Microsoft.AspNetCore.App` shared framework in .NET 7+). The extension method `AddKeycloakAuthentication` in `ConsignadoHub.BuildingBlocks` reads the `Keycloak` configuration section and registers:

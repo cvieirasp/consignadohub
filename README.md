@@ -270,7 +270,7 @@ All errors follow **RFC 7807 ProblemDetails**:
 
 ## Authentication
 
-Keycloak is the Identity Provider. The `realm-export.json` in `infra/local/keycloak/` is auto-imported on first startup with the `consignadohub` realm and the `consignadohub-api` client pre-configured.
+Keycloak is the Identity Provider. The `realm-export.json` in `infra/local/keycloak/` is auto-imported on first startup with the `consignadohub` realm pre-configured.
 
 ### Realm roles
 
@@ -279,7 +279,14 @@ Keycloak is the Identity Provider. The `realm-export.json` in `infra/local/keycl
 | `consignado-admin` | Full access — CRUD customers, manage proposals |
 | `consignado-analyst` | Read customers, simulate and submit proposals |
 
-### Acquiring a token (local development)
+### Keycloak clients
+
+| Client | Flow | Purpose |
+|---|---|---|
+| `consignadohub-api` | Direct Access Grants | curl / Postman token acquisition for dev/testing |
+| `consignadohub-web` | Authorization Code + PKCE (S256) | Browser SPA frontend (`http://localhost:4200`) |
+
+### Acquiring a token (curl / Postman)
 
 ```bash
 curl -s -X POST http://localhost:8080/realms/consignadohub/protocol/openid-connect/token \
@@ -296,6 +303,10 @@ Use the token as a Bearer header in subsequent requests:
 ```
 Authorization: Bearer <token>
 ```
+
+### Frontend SPA (PKCE flow)
+
+The Angular frontend uses `consignadohub-web` with the Authorization Code + PKCE flow. No client secret is involved. The OIDC library redirects the browser to Keycloak, exchanges the code for tokens using a code verifier, and attaches the `access_token` as a Bearer header to API calls. The resulting token is accepted by both APIs because the audience mapper includes `consignadohub-api` in the `aud` claim.
 
 ---
 
