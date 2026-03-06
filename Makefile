@@ -51,8 +51,9 @@ NOTIFICATION_INFRA   := src/services/NotificationService/src/NotificationService
 NOTIFICATION_STARTUP := src/services/NotificationService/src/NotificationService.Worker
 NOTIFICATION_CONTEXT := NotificationDbContext
 
-CUSTOMER_UNIT_TESTS  := src/services/CustomerService/tests/CustomerService.UnitTests
-PROPOSAL_UNIT_TESTS  := src/services/ProposalService/tests/ProposalService.UnitTests
+CUSTOMER_UNIT_TESTS      := src/services/CustomerService/tests/CustomerService.UnitTests
+PROPOSAL_UNIT_TESTS      := src/services/ProposalService/tests/ProposalService.UnitTests
+NOTIFICATION_UNIT_TESTS  := src/services/NotificationService/tests/NotificationService.UnitTests
 
 EF := dotnet ef
 
@@ -94,6 +95,7 @@ help:
 	@echo ""
 	@echo "  coverage-customer            Run unit tests with coverage and open HTML report – CustomerService"
 	@echo "  coverage-proposal            Run unit tests with coverage and open HTML report – ProposalService"
+	@echo "  coverage-notification        Run unit tests with coverage and open HTML report – NotificationService"
 	@echo "  coverage-all                 Run all unit tests with merged coverage HTML report"
 	@echo ""
 
@@ -127,6 +129,19 @@ coverage-proposal:
 	@echo ""
 	@echo "Report: $(COVERAGE_DIR)/proposal/html/index.html"
 
+.PHONY: coverage-notification
+coverage-notification:
+	dotnet test $(NOTIFICATION_UNIT_TESTS) \
+		--collect:"XPlat Code Coverage" \
+		--results-directory $(COVERAGE_DIR)/notification
+	reportgenerator \
+		-reports:"$(COVERAGE_DIR)/notification/**/coverage.cobertura.xml" \
+		-targetdir:"$(COVERAGE_DIR)/notification/html" \
+		-reporttypes:Html \
+		-assemblyfilters:"-*.UnitTests"
+	@echo ""
+	@echo "Report: $(COVERAGE_DIR)/notification/html/index.html"
+
 .PHONY: coverage-all
 coverage-all:
 	dotnet test $(CUSTOMER_UNIT_TESTS) \
@@ -135,6 +150,9 @@ coverage-all:
 	dotnet test $(PROPOSAL_UNIT_TESTS) \
 		--collect:"XPlat Code Coverage" \
 		--results-directory $(COVERAGE_DIR)/proposal
+	dotnet test $(NOTIFICATION_UNIT_TESTS) \
+		--collect:"XPlat Code Coverage" \
+		--results-directory $(COVERAGE_DIR)/notification
 	reportgenerator \
 		-reports:"$(COVERAGE_DIR)/**/coverage.cobertura.xml" \
 		-targetdir:"$(COVERAGE_DIR)/html" \
