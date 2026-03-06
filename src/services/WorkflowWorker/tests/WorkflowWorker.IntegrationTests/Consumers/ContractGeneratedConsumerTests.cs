@@ -25,7 +25,7 @@ public class ContractGeneratedConsumerTests(WorkflowWorkerFactory factory)
     private RabbitMqTestHelper _helper = null!;
 
     public async Task InitializeAsync() =>
-        _helper = await RabbitMqTestHelper.CreateAsync(factory.RabbitMqHostname, factory.RabbitMqAmqpPort);
+        _helper = await RabbitMqTestHelper.CreateAsync(factory.RabbitMqHostname, factory.RabbitMqAmqpPort, factory.RabbitMqUsername, factory.RabbitMqPassword);
 
     public async Task DisposeAsync() =>
         await _helper.DisposeAsync();
