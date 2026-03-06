@@ -44,10 +44,14 @@ internal sealed class ProposalRepository(ProposalDbContext db) : IProposalReposi
     public async Task AddAsync(Proposal proposal, CancellationToken ct = default) =>
         await db.Proposals.AddAsync(proposal, ct);
 
-    public async Task SaveChangesAsync(CancellationToken ct = default) =>
-        await SaveWithConcurrencyHandlingAsync(ct);
-
-    private async Task SaveWithConcurrencyHandlingAsync(CancellationToken ct)
+    /// <summary>
+    /// Saves changes to the database, handling concurrency exceptions and throwing a 
+    /// domain-specific exception if a conflict occurs.
+    /// </summary>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    /// <exception cref="ProposalConcurrencyException">Thrown when a concurrency conflict occurs.</exception>
+    public async Task SaveChangesAsync(CancellationToken ct = default)
     {
         try
         {
