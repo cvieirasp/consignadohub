@@ -2,11 +2,18 @@ using ConsignadoHub.BuildingBlocks.Messaging;
 using ConsignadoHub.BuildingBlocks.Messaging.Inbox;
 using ConsignadoHub.BuildingBlocks.Messaging.RabbitMq;
 using WorkflowWorker.Contracts.Events;
-using Microsoft.Extensions.DependencyInjection;
 using NotificationService.Application.Handlers;
 
 namespace NotificationService.Worker.Consumers;
 
+/// <summary>
+/// Consumer responsible for handling disbursement completed events and sending notifications accordingly.
+/// Implements idempotency using an inbox repository to ensure each event is processed only once.
+/// </summary>
+/// <param name="publisher">The RabbitMQ event publisher used to publish events.</param>
+/// <param name="settings">The RabbitMQ settings for configuring the consumer.</param>
+/// <param name="scopeFactory">The service scope factory for creating scoped services.</param>
+/// <param name="logger">The logger for logging information and errors.</param>
 public sealed class DisbursementCompletedNotificationConsumer(
     RabbitMqEventPublisher publisher,
     RabbitMqSettings settings,

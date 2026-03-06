@@ -2,11 +2,19 @@ using ConsignadoHub.BuildingBlocks.Messaging;
 using ConsignadoHub.BuildingBlocks.Messaging.Inbox;
 using ConsignadoHub.BuildingBlocks.Messaging.RabbitMq;
 using ProposalService.Contracts.Events;
-using Microsoft.Extensions.DependencyInjection;
 using NotificationService.Application.Handlers;
 
 namespace NotificationService.Worker.Consumers;
 
+/// <summary>
+/// Consumer responsible for processing ProposalSubmittedEvent messages and sending notifications accordingly. 
+/// Implements idempotency using the inbox pattern to ensure that each event is processed only once, 
+/// even in the case of retries or duplicates.
+/// </summary>
+/// <param name="publisher">The RabbitMQ event publisher used to publish events.</param>
+/// <param name="settings">The RabbitMQ settings for configuring the consumer.</param>
+/// <param name="scopeFactory">The service scope factory for creating scoped services.</param>
+/// <param name="logger">The logger for logging information and errors.</param>
 public sealed class ProposalSubmittedNotificationConsumer(
     RabbitMqEventPublisher publisher,
     RabbitMqSettings settings,

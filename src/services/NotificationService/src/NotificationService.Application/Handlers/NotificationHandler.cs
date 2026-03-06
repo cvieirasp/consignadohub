@@ -2,6 +2,12 @@ using Microsoft.Extensions.Logging;
 
 namespace NotificationService.Application.Handlers;
 
+/// <summary>
+/// Handles outbound notification side effects for domain events consumed from RabbitMQ.
+/// Each method is intentionally a stub: in production, replace the log call with a real
+/// delivery mechanism (e.g. SendGrid, SMTP, webhook HTTP call).
+/// NotificationService never mutates domain state — it is a pure fan-out consumer.
+/// </summary>
 public sealed class NotificationHandler(ILogger<NotificationHandler> logger)
 {
     public Task SendProposalSubmittedAsync(Guid proposalId, string correlationId, CancellationToken ct)

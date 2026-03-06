@@ -2,11 +2,19 @@ using ConsignadoHub.BuildingBlocks.Messaging;
 using ConsignadoHub.BuildingBlocks.Messaging.Inbox;
 using ConsignadoHub.BuildingBlocks.Messaging.RabbitMq;
 using WorkflowWorker.Contracts.Events;
-using Microsoft.Extensions.DependencyInjection;
 using NotificationService.Application.Handlers;
 
 namespace NotificationService.Worker.Consumers;
 
+/// <summary>
+/// Consumer responsible for processing CreditAnalysisCompletedEvent events, 
+/// sending notifications to users about the outcome of their credit analysis, 
+/// and ensuring idempotent processing using the inbox pattern.
+/// </summary>
+/// <param name="publisher">The RabbitMQ event publisher used to publish events.</param>
+/// <param name="settings">The RabbitMQ settings for configuring the consumer.</param>
+/// <param name="scopeFactory">The service scope factory for creating scoped services.</param>
+/// <param name="logger">The logger for logging information and errors.</param>
 public sealed class CreditAnalysisCompletedNotificationConsumer(
     RabbitMqEventPublisher publisher,
     RabbitMqSettings settings,
