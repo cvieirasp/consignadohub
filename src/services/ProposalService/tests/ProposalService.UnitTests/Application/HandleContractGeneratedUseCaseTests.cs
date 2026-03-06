@@ -89,6 +89,29 @@ public sealed class HandleContractGeneratedUseCaseTests
         result.Error.Code.Should().Be("Proposal.NotFound");
     }
 
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task Execute_ShouldFail_WhenProposalIsInTerminalStatus()
+    {
+        var proposalId = Guid.NewGuid();
+        var proposal = CreateRejectedProposal(proposalId);
+
+        _inboxRepositoryMock
+            .Setup(r => r.ExistsAsync(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+        _proposalRepositoryMock
+            .Setup(r => r.GetByIdForUpdateAsync(proposalId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(proposal);
+
+        var result = await _useCase.ExecuteAsync(MakeEvent(proposalId));
+
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("Proposal.InvalidStatusTransition");
+        _inboxRepositoryMock.Verify(
+            r => r.AddAsync(It.IsAny<InboxMessage>(), It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
     private static Proposal CreateApprovedProposal(Guid id)
     {
         var proposal = Proposal.Create(Guid.NewGuid(), 10_000m, 12, 1.8m);
@@ -96,6 +119,17 @@ public sealed class HandleContractGeneratedUseCaseTests
             .GetProperty("Id")!
             .SetValue(proposal, id);
         proposal.UpdateStatus(ProposalStatus.Approved, "Score: 750");
+        return proposal;
+    }
+
+    private static Proposal CreateRejectedProposal(Guid id)
+    {
+        var proposal = Proposal.Create(Guid.NewGuid(), 10_000m, 12, 1.8m);
+        typeof(Proposal)
+            .GetProperty("Id")!
+            .SetValue(proposal, id);
+        proposal.UpdateStatus(ProposalStatus.UnderAnalysis);
+        proposal.UpdateStatus(ProposalStatus.Rejected, "Poor credit score.");
         return proposal;
     }
 }

@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using ProposalService.Application.Configuration;
@@ -7,6 +8,7 @@ using ProposalService.Application.Validators;
 
 namespace ProposalService.Application.Extensions;
 
+[ExcludeFromCodeCoverage]
 public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddProposalApplication(
