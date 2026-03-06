@@ -67,7 +67,14 @@ public sealed class Proposal
         return Result.Success();
     }
 
-    /// <summary>PMT = PV * r / (1 - (1+r)^-n)</summary>
+    /// <summary>
+    /// Calculates the installment, total amount to be paid, and CET based on the requested amount, 
+    /// term in months, and monthly interest rate (PV * r / (1 - (1+r)^-n)).
+    /// </summary>
+    /// <param name="requestedAmount">The amount requested by the customer.</param>
+    /// <param name="termMonths">The term of the loan in months.</param>
+    /// <param name="monthlyRate">The monthly interest rate.</param>
+    /// <returns>A tuple containing the installment amount, total amount to be paid, and CET.</returns>
     public static (decimal Installment, decimal Total, decimal Cet) CalculateFinancials(
         decimal requestedAmount, int termMonths, decimal monthlyRate)
     {
