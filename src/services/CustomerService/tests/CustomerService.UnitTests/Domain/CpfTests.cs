@@ -49,17 +49,47 @@ public sealed class CpfTests
         cpf1.Should().Be(cpf2);
     }
 
+    [Fact]
+    public void Equals_ShouldReturnFalse_WhenObjIsNull()
+    {
+        var cpf = Cpf.Create("52998224725");
+        cpf.Equals(null).Should().BeFalse();
+    }
+
+    [Fact]
+    public void Equals_ShouldReturnFalse_WhenObjIsNotCpf()
+    {
+        var cpf = Cpf.Create("52998224725");
+        cpf.Equals("52998224725").Should().BeFalse();
+    }
+
+    [Fact]
+    public void Equals_ShouldReturnFalse_WhenValuesAreDifferent()
+    {
+        var cpf1 = Cpf.Create("52998224725");
+        var cpf2 = Cpf.Create("111.444.777-35");
+        cpf1.Equals(cpf2).Should().BeFalse();
+    }
+
+    [Fact]
+    public void GetHashCode_ShouldBeEqual_ForCpfsWithSameValue()
+    {
+        var cpf1 = Cpf.Create("529.982.247-25");
+        var cpf2 = Cpf.Create("52998224725");
+        cpf1.GetHashCode().Should().Be(cpf2.GetHashCode());
+    }
+
     [Theory]
-    [InlineData("52998224735")] // first check digit changed from 2 to 3
-    [InlineData("52998224745")] // first check digit changed from 2 to 4
+    [InlineData("98765432110")] // remainder=0 < 2 → first=0, but digit is 1
+    [InlineData("52998224735")] // remainder=9 ≥ 2 → first=11-9=2, but digit is 3
     public void IsValid_ShouldReturnFalse_WhenFirstCheckDigitIsWrong(string cpf)
     {
         Cpf.IsValid(cpf).Should().BeFalse();
     }
 
     [Theory]
-    [InlineData("52998224726")] // second check digit changed from 5 to 6
-    [InlineData("52998224727")] // second check digit changed from 5 to 7
+    [InlineData("98765432101")] // remainder=1 < 2 → second=0, but digit is 1
+    [InlineData("53998224745")] // remainder=9 ≥ 2 → second=11-9=2, but digit is 5
     public void IsValid_ShouldReturnFalse_WhenSecondCheckDigitIsWrong(string cpf)
     {
         Cpf.IsValid(cpf).Should().BeFalse();
