@@ -45,8 +45,8 @@ public sealed class ProposalApiFactory : WebApplicationFactory<Program>, IAsyncL
                 ["ConnectionStrings:ProposalDb"] = _sqlContainer.GetConnectionString(),
                 ["RabbitMq:Host"]               = _rabbitContainer.Hostname,
                 ["RabbitMq:Port"]               = _rabbitContainer.GetMappedPublicPort(5672).ToString(),
-                ["RabbitMq:Username"]           = "guest",
-                ["RabbitMq:Password"]           = "guest",
+                ["RabbitMq:Username"]           = _rabbitContainer.Username,
+                ["RabbitMq:Password"]           = _rabbitContainer.Password,
                 ["RabbitMq:VirtualHost"]        = "/",
                 ["RabbitMq:ExchangeName"]       = "consignadohub.events"
             });
