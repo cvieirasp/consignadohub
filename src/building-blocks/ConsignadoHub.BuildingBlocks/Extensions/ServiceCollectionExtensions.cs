@@ -139,17 +139,22 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        // Load RabbitMQ settings from configuration, with defaults if not provided.
-        var settings = configuration
-            .GetSection(RabbitMqSettings.SectionName)
-            .Get<RabbitMqSettings>() ?? new RabbitMqSettings();
-
-        // Register the settings as a singleton so it can be injected where needed.
-        services.AddSingleton(settings);
+        // Register settings lazily so that configuration overrides applied after service
+        // registration (e.g. WebApplicationFactory.ConfigureAppConfiguration in tests) are
+        // picked up when the singleton is first resolved, not at DI wiring time.
+        services.AddSingleton(sp =>
+        {
+            var cfg = sp.GetService<IConfiguration>() ?? configuration;
+            return cfg.GetSection(RabbitMqSettings.SectionName).Get<RabbitMqSettings>()
+                ?? new RabbitMqSettings();
+        });
 
         // Create and register the RabbitMQ publisher as a singleton, ensuring a shared connection.
-        services.AddSingleton<IEventPublisher>(_ =>
-            RabbitMqEventPublisher.CreateAsync(settings).GetAwaiter().GetResult());
+        services.AddSingleton<IEventPublisher>(sp =>
+        {
+            var settings = sp.GetRequiredService<RabbitMqSettings>();
+            return RabbitMqEventPublisher.CreateAsync(settings).GetAwaiter().GetResult();
+        });
 
         // Expose the concrete publisher so consumers can access the shared connection.
         services.AddSingleton(sp =>
