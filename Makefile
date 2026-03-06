@@ -54,6 +54,7 @@ NOTIFICATION_CONTEXT := NotificationDbContext
 CUSTOMER_UNIT_TESTS      := src/services/CustomerService/tests/CustomerService.UnitTests
 PROPOSAL_UNIT_TESTS      := src/services/ProposalService/tests/ProposalService.UnitTests
 NOTIFICATION_UNIT_TESTS  := src/services/NotificationService/tests/NotificationService.UnitTests
+WORKFLOW_UNIT_TESTS      := src/services/WorkflowWorker/tests/WorkflowWorker.UnitTests
 
 EF := dotnet ef
 
@@ -96,6 +97,7 @@ help:
 	@echo "  coverage-customer            Run unit tests with coverage and open HTML report – CustomerService"
 	@echo "  coverage-proposal            Run unit tests with coverage and open HTML report – ProposalService"
 	@echo "  coverage-notification        Run unit tests with coverage and open HTML report – NotificationService"
+	@echo "  coverage-workflow            Run unit tests with coverage and open HTML report – WorkflowWorker"
 	@echo "  coverage-all                 Run all unit tests with merged coverage HTML report"
 	@echo ""
 
@@ -142,6 +144,19 @@ coverage-notification:
 	@echo ""
 	@echo "Report: $(COVERAGE_DIR)/notification/html/index.html"
 
+.PHONY: coverage-workflow
+coverage-workflow:
+	dotnet test $(WORKFLOW_UNIT_TESTS) \
+		--collect:"XPlat Code Coverage" \
+		--results-directory $(COVERAGE_DIR)/workflow
+	reportgenerator \
+		-reports:"$(COVERAGE_DIR)/workflow/**/coverage.cobertura.xml" \
+		-targetdir:"$(COVERAGE_DIR)/workflow/html" \
+		-reporttypes:Html \
+		-assemblyfilters:"-*.UnitTests"
+	@echo ""
+	@echo "Report: $(COVERAGE_DIR)/workflow/html/index.html"
+
 .PHONY: coverage-all
 coverage-all:
 	dotnet test $(CUSTOMER_UNIT_TESTS) \
@@ -153,6 +168,9 @@ coverage-all:
 	dotnet test $(NOTIFICATION_UNIT_TESTS) \
 		--collect:"XPlat Code Coverage" \
 		--results-directory $(COVERAGE_DIR)/notification
+	dotnet test $(WORKFLOW_UNIT_TESTS) \
+		--collect:"XPlat Code Coverage" \
+		--results-directory $(COVERAGE_DIR)/workflow
 	reportgenerator \
 		-reports:"$(COVERAGE_DIR)/**/coverage.cobertura.xml" \
 		-targetdir:"$(COVERAGE_DIR)/html" \
