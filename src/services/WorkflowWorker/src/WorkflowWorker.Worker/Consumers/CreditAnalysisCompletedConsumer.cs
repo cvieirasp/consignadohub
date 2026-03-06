@@ -2,11 +2,20 @@ using ConsignadoHub.BuildingBlocks.Messaging;
 using ConsignadoHub.BuildingBlocks.Messaging.Inbox;
 using ConsignadoHub.BuildingBlocks.Messaging.RabbitMq;
 using WorkflowWorker.Contracts.Events;
-using Microsoft.Extensions.DependencyInjection;
 using WorkflowWorker.Application.Handlers;
 
 namespace WorkflowWorker.Worker.Consumers;
 
+/// <summary>
+/// Consumer responsible for handling CreditAnalysisCompletedEvent, which is published after
+/// the credit analysis for a proposal is completed. It processes the event to trigger
+/// contract generation for approved proposals and ensures idempotency using the inbox pattern.
+/// </summary>
+/// <param name="publisher">The RabbitMQ event publisher used to publish events.</param>
+/// <param name="settings">The RabbitMQ settings for configuring the consumer.</param>
+/// <param name="scopeFactory">The service scope factory for creating scoped services.</param>
+/// <param name="eventPublisher">The event publisher for publishing domain events.</param>
+/// <param name="logger">The logger for logging consumer activities.</param>
 public sealed class CreditAnalysisCompletedConsumer(
     RabbitMqEventPublisher publisher,
     RabbitMqSettings settings,

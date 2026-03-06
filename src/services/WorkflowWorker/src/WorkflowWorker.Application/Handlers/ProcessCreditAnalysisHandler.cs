@@ -1,5 +1,11 @@
 namespace WorkflowWorker.Application.Handlers;
 
+/// <summary>
+/// Simulates a credit analysis process for a loan application. 
+/// It generates a random credit score and determines approval based 
+/// on a predefined threshold. The reason for approval or denial is also 
+/// provided for transparency in the decision-making process.
+/// </summary>
 public sealed class ProcessCreditAnalysisHandler
 {
     public (bool Approved, int Score, string Reason) Analyze(
