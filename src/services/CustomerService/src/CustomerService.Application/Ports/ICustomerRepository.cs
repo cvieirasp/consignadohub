@@ -1,4 +1,3 @@
-using ConsignadoHub.BuildingBlocks.Results;
 using CustomerService.Domain.Entities;
 
 namespace CustomerService.Application.Ports;
