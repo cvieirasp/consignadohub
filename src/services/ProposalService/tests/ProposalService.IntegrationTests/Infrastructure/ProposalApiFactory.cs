@@ -17,7 +17,12 @@ public sealed class ProposalApiFactory : WebApplicationFactory<Program>, IAsyncL
     private readonly MsSqlContainer _sqlContainer = new MsSqlBuilder("mcr.microsoft.com/mssql/server:2022-latest")
         .Build();
 
+    private const string RabbitUser = "consignado";
+    private const string RabbitPass = "consignado";
+
     private readonly RabbitMqContainer _rabbitContainer = new RabbitMqBuilder("rabbitmq:4-management")
+        .WithUsername(RabbitUser)
+        .WithPassword(RabbitPass)
         .Build();
 
     public HttpClient CreateClientWithRole(string role)
@@ -45,8 +50,8 @@ public sealed class ProposalApiFactory : WebApplicationFactory<Program>, IAsyncL
                 ["ConnectionStrings:ProposalDb"] = _sqlContainer.GetConnectionString(),
                 ["RabbitMq:Host"]               = _rabbitContainer.Hostname,
                 ["RabbitMq:Port"]               = _rabbitContainer.GetMappedPublicPort(5672).ToString(),
-                ["RabbitMq:Username"]           = _rabbitContainer.Username,
-                ["RabbitMq:Password"]           = _rabbitContainer.Password,
+                ["RabbitMq:Username"]           = RabbitUser,
+                ["RabbitMq:Password"]           = RabbitPass,
                 ["RabbitMq:VirtualHost"]        = "/",
                 ["RabbitMq:ExchangeName"]       = "consignadohub.events"
             });
