@@ -21,14 +21,15 @@ public sealed class RabbitMqTestPublisher : IAsyncDisposable
     private RabbitMqTestPublisher(IConnection connection) =>
         _connection = connection;
 
-    public static async Task<RabbitMqTestPublisher> CreateAsync(string hostname, int port)
+    public static async Task<RabbitMqTestPublisher> CreateAsync(
+        string hostname, int port, string username, string password)
     {
         var factory = new ConnectionFactory
         {
             HostName = hostname,
             Port     = port,
-            UserName = "guest",
-            Password = "guest",
+            UserName = username,
+            Password = password,
         };
 
         var connection = await factory.CreateConnectionAsync();

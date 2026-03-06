@@ -14,11 +14,19 @@ public sealed class NotificationServiceFactory : WebApplicationFactory<Program>,
     private readonly MsSqlContainer _sqlContainer =
         new MsSqlBuilder("mcr.microsoft.com/mssql/server:2022-latest").Build();
 
+    private const string RabbitUser = "consignado";
+    private const string RabbitPass = "consignado";
+
     private readonly RabbitMqContainer _rabbitContainer =
-        new RabbitMqBuilder("rabbitmq:4-management").Build();
+        new RabbitMqBuilder("rabbitmq:4-management")
+            .WithUsername(RabbitUser)
+            .WithPassword(RabbitPass)
+            .Build();
 
     public string RabbitMqHostname => _rabbitContainer.Hostname;
     public int RabbitMqAmqpPort => _rabbitContainer.GetMappedPublicPort(5672);
+    public string RabbitMqUsername => RabbitUser;
+    public string RabbitMqPassword => RabbitPass;
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -33,8 +41,8 @@ public sealed class NotificationServiceFactory : WebApplicationFactory<Program>,
                 ["ConnectionStrings:NotificationDb"] = _sqlContainer.GetConnectionString(),
                 ["RabbitMq:Host"]                    = _rabbitContainer.Hostname,
                 ["RabbitMq:Port"]                    = _rabbitContainer.GetMappedPublicPort(5672).ToString(),
-                ["RabbitMq:Username"]                = "guest",
-                ["RabbitMq:Password"]                = "guest",
+                ["RabbitMq:Username"]                = RabbitUser,
+                ["RabbitMq:Password"]                = RabbitPass,
                 ["RabbitMq:VirtualHost"]             = "/",
                 ["RabbitMq:ExchangeName"]            = "consignadohub.events",
             });

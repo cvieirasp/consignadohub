@@ -22,7 +22,8 @@ public class DisbursementCompletedNotificationConsumerTests(NotificationServiceF
 
     public async Task InitializeAsync() =>
         _publisher = await RabbitMqTestPublisher.CreateAsync(
-            factory.RabbitMqHostname, factory.RabbitMqAmqpPort);
+            factory.RabbitMqHostname, factory.RabbitMqAmqpPort,
+            factory.RabbitMqUsername, factory.RabbitMqPassword);
 
     public async Task DisposeAsync() =>
         await _publisher.DisposeAsync();
