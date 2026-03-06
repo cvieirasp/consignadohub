@@ -120,7 +120,7 @@ public sealed class CustomersEndpointTests(CustomerApiFactory factory)
     [Fact]
     public async Task GET_GetCustomerById_Returns200_ForAnalyst()
     {
-        var createResponse = await _client.PostAsJsonAsync("/v1/customers", ValidInput("295.379.955-26"));
+        var createResponse = await _client.PostAsJsonAsync("/v1/customers", ValidInput("295.379.955-93"));
         var id = await createResponse.Content.ReadFromJsonAsync<Guid>();
 
         var response = await _analystClient.GetAsync($"/v1/customers/{id}");
@@ -149,7 +149,7 @@ public sealed class CustomersEndpointTests(CustomerApiFactory factory)
     [Fact]
     public async Task PUT_UpdateCustomer_Returns403_ForAnalyst()
     {
-        var createResponse = await _client.PostAsJsonAsync("/v1/customers", ValidInput("867.491.130-10"));
+        var createResponse = await _client.PostAsJsonAsync("/v1/customers", ValidInput("867.491.130-79"));
         var id = await createResponse.Content.ReadFromJsonAsync<Guid>();
 
         var updateInput = new { FullName = "Should Fail", Email = "fail@example.com", Phone = "11999998888" };
@@ -161,7 +161,7 @@ public sealed class CustomersEndpointTests(CustomerApiFactory factory)
     [Fact]
     public async Task DELETE_DeactivateCustomer_Returns403_ForAnalyst()
     {
-        var createResponse = await _client.PostAsJsonAsync("/v1/customers", ValidInput("301.468.580-22"));
+        var createResponse = await _client.PostAsJsonAsync("/v1/customers", ValidInput("301.468.580-18"));
         var id = await createResponse.Content.ReadFromJsonAsync<Guid>();
 
         var response = await _analystClient.DeleteAsync($"/v1/customers/{id}");
