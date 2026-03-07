@@ -11,17 +11,17 @@ public static partial class ProposalEndpoints
     private static async Task<IResult> ListByCustomer(
         [FromQuery] Guid customerId,
         [FromQuery] ProposalStatus? status,
-        [FromQuery] int page,
-        [FromQuery] int pageSize,
         ListProposalsByCustomerUseCase useCase,
         HttpContext ctx,
-        CancellationToken ct)
+        CancellationToken ct,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20)
     {
         var input = new ListProposalsByCustomerInput(
             customerId,
             status,
-            page == 0 ? 1 : page,
-            pageSize == 0 ? 20 : pageSize);
+            page,
+            pageSize);
 
         var result = await useCase.ExecuteAsync(input, ct);
         return result.IsSuccess
