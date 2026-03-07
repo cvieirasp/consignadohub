@@ -8,14 +8,14 @@ namespace CustomerService.Api.Endpoints;
 public static partial class CustomerEndpoints
 {
     private static async Task<IResult> SearchCustomers(
-        [FromQuery] string? name,
-        [FromQuery] int page,
-        [FromQuery] int pageSize,
         SearchCustomersUseCase useCase,
         HttpContext ctx,
-        CancellationToken ct)
+        CancellationToken ct,
+        [FromQuery] string? name = null,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
-        var input = new SearchCustomersInput(name, page == 0 ? 1 : page, pageSize == 0 ? 20 : pageSize);
+        var input = new SearchCustomersInput(name, page, pageSize);
         var result = await useCase.ExecuteAsync(input, ct);
         return result.IsSuccess
             ? Results.Ok(result.Value)
