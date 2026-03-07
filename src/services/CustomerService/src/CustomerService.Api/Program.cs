@@ -54,6 +54,15 @@ builder.Services.AddOpenApi(options =>
     });
 });
 
+// CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Angular", policy =>
+        policy.WithOrigins("http://localhost:4200")
+              .AllowAnyHeader()
+              .AllowAnyMethod());
+});
+
 // ProblemDetails
 builder.Services.AddProblemDetails();
 
@@ -66,6 +75,7 @@ var app = builder.Build();
 // Middleware pipeline
 app.UseExceptionHandler();
 app.UseStatusCodePages();
+app.UseCors("Angular");
 app.UseCorrelationId();
 app.UseAuthentication();
 app.UseAuthorization();
