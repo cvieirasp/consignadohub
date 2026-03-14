@@ -8,43 +8,7 @@ All diagrams use [Mermaid](https://mermaid.js.org/) and render natively on GitHu
 
 Who uses the system and what external dependencies exist.
 
-```mermaid
-C4Context
-    title ConsignadoHub — System Context
-
-    Person(admin, "Admin", "Creates/manages customers and reviews proposals")
-    Person(analyst, "Analyst", "Submits proposals and queries status/timeline")
-
-    System_Boundary(consignadohub, "ConsignadoHub") {
-        System(customerSvc, "CustomerService", "Customer registration and management")
-        System(proposalSvc, "ProposalService", "Proposal simulation, submission, and status tracking")
-        System(workflowWorker, "WorkflowWorker", "Async credit analysis, contract generation, disbursement")
-        System(notificationSvc, "NotificationService", "Fan-out notifications (email/webhook stubs)")
-    }
-
-    System_Ext(keycloak, "Keycloak", "OIDC Identity Provider — issues JWT tokens")
-    System_Ext(rabbitmq, "RabbitMQ", "Message broker — topic exchange consignadohub.events")
-    System_Ext(sqlserver, "SQL Server", "Relational database — one DB per service")
-
-    Rel(admin, customerSvc, "CRUD customers", "HTTPS / JWT")
-    Rel(analyst, proposalSvc, "Simulate & submit proposals", "HTTPS / JWT")
-    Rel(analyst, customerSvc, "Search/view customers", "HTTPS / JWT")
-
-    Rel(customerSvc, keycloak, "Validates JWT", "OIDC")
-    Rel(proposalSvc, keycloak, "Validates JWT", "OIDC")
-
-    Rel(customerSvc, sqlserver, "Reads/Writes", "EF Core")
-    Rel(proposalSvc, sqlserver, "Reads/Writes + Outbox", "EF Core")
-    Rel(workflowWorker, sqlserver, "Inbox (idempotency)", "EF Core")
-    Rel(notificationSvc, sqlserver, "Inbox (idempotency)", "EF Core")
-
-    Rel(proposalSvc, rabbitmq, "Publishes via Outbox", "AMQP")
-    Rel(workflowWorker, rabbitmq, "Consumes & Publishes", "AMQP")
-    Rel(notificationSvc, rabbitmq, "Consumes", "AMQP")
-    Rel(proposalSvc, rabbitmq, "Consumes (status updates)", "AMQP")
-```
-
----
+![Texto_alternativo_imagem](images/ConsignadoHub%20-%20System%20Context.png)
 
 ## 2. Container Diagram
 
